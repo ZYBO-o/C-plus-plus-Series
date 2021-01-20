@@ -36,14 +36,10 @@
 + int，long，long long (**C++ 11特性**)，short都属于整型，区分是C++标准规定的尺寸的最小值(类型在内存中所占的比特数)不同。其中short是短整型，占16位；int是整型，占16位；long和 long long 是长整型，分别占32位和64位。
 + float和double分别是单精度浮点数和双精度浮点数。float以32比特表示，具有7个有效位；double以32位表示，具有16个有效位；long double具有3或4个字表示，但是它的计算代价相对更大。
 
-<br/>
-
 ### 2.类型转换
 
 + 赋给带符号类型一个超过它范围的值时，结果是未定义的。
 + 切勿混**用带符号数**与**无符号数类型**，当带符号数取值为负数时会出现异常结果，因为带符号数会先自动转换成无符号数。
-
-<br/>
 
 ### 3.字面值常量
 
@@ -52,8 +48,6 @@
   + `std::cout << '155' << '\n';`//输出m
   + `std::cout << "\1234";`//表示两个字符，八进制数123与字符4 ，输出为S4
   + `std::cout << "\x1234";`//会报错，因为这表示一个16位的字符，该字符由这4个16进制所对应的比特数唯一确定。而大多数机器的char类型只占8位，所以会报错。
-
-<br/>
 
 ---
 
@@ -79,8 +73,6 @@
 
     > `long double Id = 3.1215926; int a{Id}`//报错
 
-<br/>
-
 ### 2.变量声明和定义的关系
 
 + C++为了支持分离式编译，C++将声明与定义区分开来。
@@ -94,8 +86,6 @@
 
 + 如果在多个文件中使用同一个变量，就必须将声明与定义分离。
 
-<br/>
-
 ### 3.标识符
 
 + 用户自定义的标识符中不能连续出现两个下划线，也不能以下划线连接大写字母开头。
@@ -103,13 +93,9 @@
 
 > 但是自己实验发现并不报错。。
 
-<br/>
-
 ### 4.名字的作用域
 
 + 在局部作用域中使用全局作用域，利用`::`符号。
-
-<br/>
 
 ---
 
@@ -120,8 +106,6 @@
 + 引用就是给对象起另一个名字。**引用必须被初始化。**
 + 定义引用时，程序会把引用和它的初值绑定，而不是简单的拷贝。
 + 引用必须是指向一个实际存在的对象，而不是字面值常量。
-
-<br/>
 
 ### 2.指针
 
@@ -183,8 +167,6 @@
 
 + `void*` 是一种特殊的指针类型，可用于存放任何对象的地址。
 
-<br/>
-
 ### 3.复合类型的声明
 
 + 指向指针的引用
@@ -196,8 +178,6 @@
   r = &i;//r引用了指针，所以r赋值&i就是令p指向i
   *r= 0;//引用r得到i，也就是p指向的对象，将i的值修改为0
   ```
-
-<br/>
 
 ---
 
@@ -235,8 +215,6 @@
   ```
 
   其中temp就是编译器需要空间来暂存表达式的求值结果时临时创建的一个未命名对象。
-
-<br/>
 
 ### 2.指针和const
 
@@ -291,8 +269,6 @@
   const int &r = ci;
   ```
 
-<br/>
-
 ### 3.constexpr表达式
 
 + **常量表达式：**值不会改变且在编译过程中就能得到计算结果的表达式，运行时得到结果不算。
@@ -326,8 +302,6 @@
 
   p是一个指向常量的指针，而q是一个常量指针。
 
-<br/>
-
 ---
 
 ## (五).处理类型
@@ -357,8 +331,6 @@
 
   这种理解是错误的。声明语句中用到pstring时，其基本类型是指针。前者是一个指向char类型的常量指针，后者是声明了一个指向const char的指针。
 
-<br/>
-
 ### 2.auto类型说明符
 
 + C++11引入auto类型说明符，让编译器来分析表达式所属的类型。而且auto定义的变量必须有初始值。而且一条语句只能有一种基本数据类型。
@@ -376,8 +348,6 @@
   auto &h = 42;//错误
   const auto &j = 42;//***正确，可以为常量引用绑定字面值。***
   ```
-
-<br/>
 
 ### 3.decltype类型指示符
 
@@ -407,8 +377,6 @@ decltype(p) d = &j;
   + 对解引用操作，auto推断出原有类型，decltype推断出引用；
   + auto推断时会实际执行，decltype不会执行，只做分析。总之在使用中过程中和const、引用和指针结合时需要特别小心。
 
-<br/>
-
 ---
 
 # 二.字符串,向量和数组
@@ -420,20 +388,20 @@ decltype(p) d = &j;
 + 初始化方式主要有：
 
 <div align="center">  
-  <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/1.png"  width="600"/> 
+  <img src="https://github.com/ZYBO-o/C-Series/blob/main/images/1.png"  width="600"/> 
 </div>
 
-> 其中主要分为：**拷贝初始化**(用等号初始化)和**直接初始化**。
 
-<br/>
+> 其中主要分为：**拷贝初始化**(用等号初始化)和**直接初始化**。
 
 ### 2.string对象上的操作
 
 string的操作主要有：
 
 <div align="center">  
-  <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/2.png"  width="600"/> 
+  <img src="https://github.com/ZYBO-o/C-Series/blob/main/images/2.png"  width="600"/> 
 </div>
+
 
 + **IO操作符进行读写string对象时需要注意：**
 
@@ -456,8 +424,6 @@ string的操作主要有：
     string s1 = "!";
     string s2 = "hello " + "," + "world" + s1;//错误，最左边相加时没有string类型。
     ```
-
-<br/>
 
 ### 3.处理string对象中的字符
 
@@ -514,8 +480,6 @@ string的操作主要有：
           cout<<s1<<endl;
       ```
 
-<br/>
-
 ---
 
 ## (二).标准库类型vector
@@ -525,8 +489,9 @@ string的操作主要有：
 + **定义vector对象的常用方法：**
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/3.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-Series/blob/main/images/3.png"  width="600"/> 
   </div>
+
 
   + C++11标准规定可以使用花括号初始化vector对象。但是不能在圆括号中进行列表初始化。
 
@@ -549,15 +514,14 @@ string的操作主要有：
   vector<string> str4{10, "hello"};//初始化10个元素，为"hello"
   ```
 
-<br/>
-
 ### 2.vector的一些操作
 
 + **vector对象中的一些操作：**
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/4.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-Series/blob/main/images/4.png"  width="600"/> 
   </div>
+
 
   + 如果循环体内包含有向vector对象添加元素的语句，咋不能使用范围for循环。
   + 如果定义时`vector<int>`，则它的size函数类型是`vector<int>::size_type`。
@@ -572,8 +536,6 @@ string的操作主要有：
   }
   ```
 
-<br/>
-
 ---
 
 ## (三).迭代器介绍
@@ -585,8 +547,9 @@ string的操作主要有：
 + **迭代器运算符**
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/5.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-Series/blob/main/images/5.png"  width="600"/> 
   </div>
+
 
   使用迭代器来实现修改字符串为大写：
 
@@ -641,19 +604,16 @@ string的操作主要有：
   + 不能在范围for循环中向vector对象添加元素
   + 任何一种可能改变vector对象容量的操作(如push_back)，都会是该vector对象的迭代器失效。
 
-<br/>
-
 ### 2.迭代器计算
 
 + **迭代器运算：**
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/6.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-Series/blob/main/images/6.png"  width="600"/> 
   </div>
 
+  
   > 参与比较的两个迭代器必须合法且指向的是同一个容器的元素。
-
-<br/>
 
 ---
 
@@ -667,8 +627,6 @@ string的操作主要有：
   unsigned cnt = 42;
   string bad[cnt];//错误，cnt不是常量表达式
   ```
-
-<br/>
 
 ### 2.指针与数组
 
@@ -692,8 +650,6 @@ string的操作主要有：
   cout<< p1[-1] <<endl;
   ```
 
-<br/>
-
 ### 3.C风格字符串
 
 +  **传入C风格字符串函数的字符数组必须以空字符作为结束。**
@@ -714,8 +670,6 @@ string的操作主要有：
   string1 += "!!";
   ```
 
-<br/>
-
 ### 4.与旧代码的接口
 
 + **允许使用数组来初始化vector对象，但是相反不行。**
@@ -727,8 +681,6 @@ string的操作主要有：
   ```
 
 
-
-<br/>
 
 ---
 
@@ -813,8 +765,6 @@ string的操作主要有：
     int (&arrPtr)[4] = array;
     ```
 
-<br/>
-
 ---
 
 # 三.表达式
@@ -826,8 +776,6 @@ string的操作主要有：
 + **对于左值和右值：**
   + 左值 (lvalue, locator value) 表示了一个占据内存中某个可识别的位置（也就是一个地址）的对象。
   + 右值 (rvalue)则使用排除法来定义。一个表达式不是 左值 就是 右值 。 那么，右值是一个 不 表示内存中某个可识别位置的对象的表达式。
-
-<br/>
 
 ### 2.算数运算符
 
@@ -865,8 +813,6 @@ string的操作主要有：
   cout << *pq++ <<endl;
   ```
 
-<br/>
-
 ## (三).条件运算符
 
 + **嵌套条件运算符**
@@ -884,13 +830,9 @@ string的操作主要有：
   cout << grade < 60 ? "false" : "pass";//错误：试图比较count和60
   ```
 
-<br/>
-
 ## (四).位运算符
 
 + 对于位运算符，强烈建议仅将位运算符用于处理无符号类型。
-
-<br/>
 
 ## (五).sizeof运算符
 
@@ -932,8 +874,6 @@ string的操作主要有：
   + 任何具有明确定义的类型转换，只要不包括底层const，都可以使用`static_cast`。
   + 当需要把一个较大的算数类型赋值给较小的类型时，`static_cast`很有用。
   + 当把指针存放在`void*`中，并且使用static_cast将其强制转换回原来的类型时，必须确保转换后所得的类型就是指针所指的类型。
-
-<br/>
 
 ---
 
