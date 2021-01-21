@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -8,7 +9,20 @@ using namespace std;
 
 int main() {
 
-    
+    vector<int> v1(10);
+
+    cout<< v1.size() << endl;
+
+    for (int i = 0; i < 15; ++i) {
+        v1.push_back(i);
+    }
+
+    cout<< v1.size() << endl;
+
+    for (auto i : v1) {
+        cout << i << endl;
+    }
+
 
     /*
     const double p1 = 3.14;

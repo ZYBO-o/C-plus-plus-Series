@@ -546,6 +546,10 @@ string的操作主要有：
   vector<string> str4{10, "hello"};//初始化10个元素，为"hello"
   ```
 
++ **vector对象能高速增长：**
+
+  C++标准要求vector应该在运行时高效快速地添加元素。因此既然vector对象能高速地增长，那么定义vector对象时候设定其大小也就没有什么必要了。
+
 ### 2.vector的一些操作
 
 + **vector对象中的一些操作：**
@@ -565,6 +569,20 @@ string的操作主要有：
   vector<int> array(10);
   for (decltype(array.size()) i = 0; i < array.size(); ++i) {
   		array[i] = ++count;
+  }
+  ```
+
++ vector对象(以及string对象)的下标运算符可用于访问已存在的元素，而不能用于添加元素。
+
+  ```c++
+  vector<int> array;
+  //错误，因为array是一个空vector，根本不包含任何元素，所以不能通过下标去访问任何元素
+  for (decltype(array.size()) i = 0; i < 10; ++i) {
+  		array[i] = i;
+  }
+  //正确，添加新的元素
+  for (decltype(array.size()) i = 0; i < 10; ++i) {
+  		array.push_back(i);
   }
   ```
 
