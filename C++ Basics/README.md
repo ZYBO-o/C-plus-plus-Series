@@ -422,14 +422,25 @@ string的操作主要有：
 
   + 在执行读操作时，string类型会自动忽略开头的空白(即空格符，换行符，制表符等)并**从第一个真正的字符开始读起，直到遇见下一个空白为止。**
 
+    > 如果输入的是 $\quad\quad\quad Hello World\quad\quad\quad$，输出是$Hello$，结果中没有任何空格。
+
 + **可以使用getline读取一整行**
 
-  + 用getline读取时，会保留输入时的空白符，直到遇到换行符(会被读入)。但是出发getline函数返回的换行符最后会被丢弃，得到string对象中并不包含那个换行符。
+  + 用getline读取时， **会保留输入时的空白符，直到遇到换行符(会被读入)** 。但是出发getline函数返回的换行符最后会被丢弃，得到string对象中并不包含那个换行符。
+
+    ```c++
+    string str;
+    getline(cin,str);
+    cout << str ;
+    cout << "Over" << endl;
+    ```
+
+    > 输入 $\quad\quad\quad Hello World\quad\quad\quad$,输出为： $\quad\quad\quad Hello World\quad\quad\quad Over$。
 
 + **size函数返回类型**
 
-  + size函数返回的是 `string::size` 类型的值，它是一个无符号数类型。
-  + 表达式中已经有了size函数就不要用int了，这样可以避免混用有符号数与无符号数带来的问题。
+  + size函数返回的是 `string::size` 类型的值，它是一个无符号数类型，可以利用`auto`或者`decltype`来推断变量的类型。
+  + **表达式中已经有了`size()`函数就不要用int了，<font color = red>即不要进行混合运算</font> **，这样可以避免混用有符号数与无符号数带来的问题。
 
 + **string对象相加**
 
@@ -441,6 +452,12 @@ string的操作主要有：
     ```
 
 ### 3.处理string对象中的字符
+
++ 在`cctype头文件`中定义了一组函数用于处理字符，如下表：
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-Series/blob/main/images/32.png"  width="600"/> 
+  </div>
 
 + **处理字符时，C++11标准提出了范围for语句：**
 
@@ -477,22 +494,22 @@ string的操作主要有：
     + 使用下标进行迭代的例子。
 
       ```c++ 
-       string s1 = "honey lay";
-          
-          for (decltype(s1.size()) index = 0; index != s1.size() && !isspace((s1[index])); index++   )
-              s1[index] = toupper(s1[index] );
-      		//输出结果为HONEY lay
-          cout<<s1<<endl;
+      string s1 = "honey lay";
       
-          for (decltype(s1.size()) index = 0; index != s1.size() ; index++   )
-          {
-              if (isspace((s1[index])))
-                  continue;
-              else
-                  s1[index] = toupper(s1[index] );
-          }
-      	//输出结果为HONEY LAY
-          cout<<s1<<endl;
+      for (decltype(s1.size()) index = 0; index != s1.size() && !isspace((s1[index])); index++)
+      		s1[index] = toupper(s1[index] );
+      //输出结果为HONEY lay
+      cout<<s1<<endl;
+      
+      for (decltype(s1.size()) index = 0; index != s1.size() ; index++)
+      {
+      		if (isspace((s1[index])))
+      				continue;
+      		else
+      				s1[index] = toupper(s1[index] );
+      }
+      //输出结果为HONEY LAY
+      cout<<s1<<endl;
       ```
 
 ---
