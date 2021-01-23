@@ -1,27 +1,42 @@
-#include <iostream>
-#include <string>
-#include <vector>
 
+//arctanx函数
+#include<iostream>
 using namespace std;
+double arctan(double x){
 
 
+    double sqr = x*x;
 
+    double e = x;
 
-int main() {
+    double r = 0;
 
-    vector<int> v1(10);
+    int i = 1;
+    while(e/i > 1e-15){
 
-    cout<< v1.size() << endl;
-
-    for (int i = 0; i < 15; ++i) {
-        v1.push_back(i);
+        double f = e/i;
+        r = (i%4==1) ? r+f : r-f;
+        e = e*sqr;
+        i+=2; 
     }
+    return r;
+}
 
-    cout<< v1.size() << endl;
 
-    for (auto i : v1) {
-        cout << i << endl;
-    }
+int main()
+{
+
+    double a=16.0*arctan(2);
+    double b=4.0*arctan(1/239.0);
+    //整数相除结果取整，如果参数写1/5，1/239，结果就都是0
+    cout<<"PI = "<<a-b<<endl;
+
+
+
+
+
+    return 0;
+}
 
 
     /*
@@ -58,10 +73,15 @@ int main() {
      */
 
 
-
-
-
-
+/***
+//将8位二进制数字转换为十进制数字
+#include<iostream>
+using namespace std;
+double power(double x,int n);//计算x的n次方
+int main(){
 
     return 0;
 }
+
+***/
+
