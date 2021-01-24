@@ -26,10 +26,9 @@ double arctan(double x){
 int main()
 {
 
-    double a=16.0*arctan(2);
-    double b=4.0*arctan(1/239.0);
-    //整数相除结果取整，如果参数写1/5，1/239，结果就都是0
-    cout<<"PI = "<<a-b<<endl;
+    int m = 5, n =3;
+
+    cout<<m % n<<endl;
 
 
 
