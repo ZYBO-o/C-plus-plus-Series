@@ -223,10 +223,12 @@ int main() {
       print(array);
       return 0;
   }
-  /*********************************/
-void print(int (*array)[10])
+  ```
+
+  ```c++
+  void print(int (*array)[10])
   {
-    for (auto elem : array[0])
+      for (auto elem : array[0])
           cout<< elem << endl;
   }
   int main() {
@@ -235,9 +237,9 @@ void print(int (*array)[10])
       return 0;
   }
   ```
-  
+
   + 其中`&array`两端的括号必不可少
-  
+
     ```c++
     f(int &array[10])//错误：将array声明成 引用的数组
     f(int (&array)[10])//正确，array是具有10个整数的整型数组的引用
