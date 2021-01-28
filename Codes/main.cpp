@@ -3,27 +3,31 @@
 #include<iostream>
 using namespace std;
 
-void changeValue(int *p_value)
-{
-    int i = 3;
+double sum(initializer_list<double> il){
+    double sum = 0;
+    for (auto tmp : il)
+        sum += tmp;
+    return sum;
+}
 
-    cout<< "In function, p_value = " << *p_value <<" and Pp_value = " << p_value <<endl;
-
-    *p_value = 4;
-    cout<< "In function, After Change1 ; p_value = " << *p_value <<" and Pp_value = " << p_value <<endl;
-
-    p_value = &i;
-    cout<< "In function, After Change2 ; p_value = " << *p_value <<" and Pp_value = " << p_value <<endl;
+double average(const initializer_list<double> &ril){
+    if (ril.size() > 0){
+        double sum = 0;
+        for (auto tmp : ril)
+            sum += tmp;
+        return sum / ril.size();
+    }
+    return 0.0;
 }
 
 int main(){
-    int a = 1;
-    cout<< "a = " << a <<" and p_a = " << &a <<endl;
-    changeValue(&a);
-    cout<< "After function, a = " << a <<" and p_a = " << &a <<endl;
-    return 0;
+    cout << "sum:" << sum({ 2, 3, 4 }) << ", ave:" << average({ 2.0, 3, 4 }) << endl;
+    initializer_list<double> dl = { 1.5, 2.5, 3.5, 4.5, 5.5 };
+    cout << "sum:" << sum(dl) << ", ave:" << average(dl) << endl;
+    dl = { 1, 2, 3, 4, 5, 6 };
+    cout << "sum:" << sum(dl) << ", ave:" << average(dl) << endl;
+    system("pause");
 }
-
 
     /*
     const double p1 = 3.14;

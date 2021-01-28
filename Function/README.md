@@ -103,7 +103,7 @@ int main() {
 
   + 在C++中，建议使用`引用类型`的形参代替`指针`。
 
-<br/>
+
 
 ### 2.传引用参数
 
@@ -160,7 +160,7 @@ int main() {
   // 3
   ```
 
-<br/>
+
 
 ### 3.const形参与实参
 
@@ -178,10 +178,37 @@ int main() {
   + 又能给别人提示，这是一个常量。
   + **<font color = red>普通引用无法传入常量与字面值，限制了函数所能接受的实参类型。</font>**
 
-</br>
 
-### 4.数组实参
 
+### 4.数组形参
+
+- 由于`不能拷贝数组`，故不能以值传递方式传入数组
+
+- 由于`数组会被转为指针`，故向函数传入数组时，实际上是传指针。（所以函数内不能用`sizeof`等得到数组大小）
+
+- 形参数组的大小对函数没有影响，函数也不知道实参数组的尺寸
+
+  ```c++
+  /以下3个函数等价，形参类型都是const int *
+  void print(const int *);
+  void print(const int []);
+  void print(const int [10]); //数组大小传入时被丢弃
+  ```
+
++ 3种传入数组时界定范围的方法：
+
+  - 要求数组本身有`结束标记`，如C风格字符串
+  - 传入`一对迭代器`（首指针和尾后指针），可由begin和end函数得到，类似标准库操作
+  - 定义一个表示`数组大小`的形参
+  
+  ```c++
+  void print(const char *cp){}                    //C风格字符串
+  void print(const int *beg, const int *end){}    //一对迭代器
+  void print(const int ia[], size_t size){}       //传入大小
+  ```
+  
+  
+  
 + **C++允许将变量定义成数组的引用，同样，形参也可以是数组的引用。**
 
   ```c++
@@ -196,20 +223,59 @@ int main() {
       print(array);
       return 0;
   }
+  /*********************************/
+void print(int (*array)[10])
+  {
+    for (auto elem : array[0])
+          cout<< elem << endl;
+  }
+  int main() {
+      int array[10][10] = {1,2,3,4,45,56,6};
+      print(array);
+      return 0;
+  }
   ```
-
+  
   + 其中`&array`两端的括号必不可少
-
+  
     ```c++
-    f(int &array[10])//错误：将array声明成引用的数组
+    f(int &array[10])//错误：将array声明成 引用的数组
     f(int (&array)[10])//正确，array是具有10个整数的整型数组的引用
     int (*array)[10];//这是指向含有10个整数的数组的指针
     //以上都要区分好
     ```
 
-<br/>
++ 传递`多维数组`时，多维数组的首元素本身就是数组，因此首元素指针就是指向数组的指针。传入函数时，首元素指针指向的对象仍是数组， **因此数组的第二维以及其后所有维度的大小都是数组类型的一部分，不能省略。**
 
-### 5.含有可变形参的函数
+  + 例子：传入多维数组时，只有第一维被转指针
+
+    ```c++
+    //以下两定义等价
+    void print(int (*matrix)[10], int rowSize){}    //指针形式传入二维数组
+    void print(int matrix[][10], int rowSize){}     //数组形式传入二维数组
+    ```
+
+### 5.main：处理命令行选项
+
+- 可以给main传递实参，在命令行运行程序时传递给main函数
+
+  ```c++
+  //main的两种定义方式
+  int main(int argc, char *argv[]){}
+  int main(int argc, char **argv){}
+  ```
+
+- `argv`是一个数组，其元素是指向C风格字符串的指针。`argc`表示数组长度
+
+- 例子：命令行向main传参
+
+  ```bash
+  $ prog -d -o ofile data  # argc=5, argv={"prog","-d","-o","ofile","data"}
+  ```
+
+
+
+### 6.含有可变形参的函数
 
 + **对于处理不同数量实参的函数：**
 
@@ -221,19 +287,20 @@ int main() {
   ```c++
   double sum(initializer_list<double> il){
       double sum = 0;
-      for (auto tmp : il) sum += tmp;
+      for (auto tmp : il) 
+        sum += tmp;
       return sum;
   }
   
   double average(const initializer_list<double> &ril){
       if (ril.size() > 0){
           double sum = 0;
-          for (auto tmp : ril) sum += tmp;
+          for (auto tmp : ril) 
+            sum += tmp;
           return sum / ril.size();
       }
       return 0.0;
   }
-  
   
   int main(){
       cout << "sum:" << sum({ 2, 3, 4 }) << ", ave:" << average({ 2.0, 3, 4 }) << endl;
@@ -247,7 +314,7 @@ int main() {
 
 + **initializer_list 对象的元素永远都是常量值**
 
-<br/>
+
 
 ## 三.返回类型和return类型
 
@@ -357,9 +424,7 @@ int main() {
 
   + 如果函数返回类型是内置类型，则花括号包围的列表最多包含一个值，而且该值所占空间不应该大于目标类型的空间。
 
-<br/>
-
-## 2.返回数组指针
+### 2.返回数组指针
 
 + **声明一个返回数组指针的函数：**
 
@@ -395,7 +460,7 @@ int main() {
 
     ```c++
     int array[10] = {1,2,3,4};
-    
+    //表示解引用func的掉用那个将得到一个大小是10的数组
     int (*func(int i ))[10]
     {
       	//加上引用和全局变量符号
@@ -449,7 +514,7 @@ int main() {
   }
   ```
 
-<br/>
+
 
 ## 四.函数重载
 
@@ -457,9 +522,41 @@ int main() {
   + 顶层const不影响传入函数的对象。一个拥有顶层const的形参无法和一个米有顶层const的形参区分开来。
   + 如果形参是引用或指针时，通过区分其指向的是常量对象还是非常量对象可以实现函数重载。
 
+  ```c++
+  Record lookup(Phone);
+  Record lookup(const Phone);     //顶层const，不可重载，重复声明
+  Record lookup(Phone *);
+  Record lookup(Phone * const);   //顶层const，不可重载，重复声明
+  Record lookup(Account &);
+  Record lookup(const Account &); //底层const，可以重载
+  Record lookup(Account *);
+  Record lookup(const Account *); //底层const，可以重载
+  ```
+  
+  
+  
 + **const_cast与重载**
 
-  + const_cast在重载场景中很有效果。
+  + `const_cast`在重载函数的情形中很有用，它可以修改指针或引用的底层const权限。若一个引用/指针指向了`非常量对象`，而该引用/指针却被声明为常量引用/指向常量的指针，则不可通过此引用/指针来修改对象，除非用const_cast将此引用/指针的底层const资格去掉。
+
+  + const_cast只可在`底层本来为非常量对象`时，才能去掉引用/指针的底层const.
+
+  + 例子：const_cast修改引用/指针的底层const
+
+    ```c++
+    //返回两字符串的较短者，输入输出都是常量引用
+    const string &shorterString(const string &s1, const string &s2){
+        return (s1.size()<=s2.size()>)?(s1):(s2);
+    }
+    //上一个函数的重载，输入输出都是非常量引用的版本
+    string &shorterString(string &s1, string &s2){                  //输入对象本来是非常量
+        auto &r=shorterString(  const_cast<const string &>(s1),
+                                const_cast<const string &>(s2));    //修改引用权限，使引用为底层const
+        return const_cast<string &>(r);                             //底层对象实际仍为非常量，只是引用是底层const，此时可用const_cast修改引用权限
+    }
+    ```
+
+    
 
 + **调用重载的函数**
 
@@ -484,7 +581,7 @@ int main() {
 
     找最佳匹配。
 
-<br/>
+
 
 ## 五.特殊用途语言特性
 
@@ -674,5 +771,5 @@ int main(){
   decltype(sumLength) *getFuc(const string&);
   ```
 
-  + **decltype作用于某函数时，返回的是函数类型而不是指针类型。**
+  + **decltype作用于某函数时，返回的是<font color = red>函数类型而不是指针类型</font>。**
 
