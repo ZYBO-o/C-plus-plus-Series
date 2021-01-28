@@ -2,38 +2,25 @@
 //arctanx函数
 #include<iostream>
 using namespace std;
-double arctan(double x){
 
+void changeValue(int *p_value)
+{
+    int i = 3;
 
-    double sqr = x*x;
+    cout<< "In function, p_value = " << *p_value <<" and Pp_value = " << p_value <<endl;
 
-    double e = x;
+    *p_value = 4;
+    cout<< "In function, After Change1 ; p_value = " << *p_value <<" and Pp_value = " << p_value <<endl;
 
-    double r = 0;
-
-    int i = 1;
-    while(e/i > 1e-15){
-
-        double f = e/i;
-        r = (i%4==1) ? r+f : r-f;
-        e = e*sqr;
-        i+=2; 
-    }
-    return r;
+    p_value = &i;
+    cout<< "In function, After Change2 ; p_value = " << *p_value <<" and Pp_value = " << p_value <<endl;
 }
 
-
-int main()
-{
-
-    int m = 5, n =3;
-
-    cout<<m % n<<endl;
-
-
-
-
-
+int main(){
+    int a = 1;
+    cout<< "a = " << a <<" and p_a = " << &a <<endl;
+    changeValue(&a);
+    cout<< "After function, a = " << a <<" and p_a = " << &a <<endl;
     return 0;
 }
 
