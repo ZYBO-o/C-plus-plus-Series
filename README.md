@@ -10,7 +10,13 @@
 
 ## 二.函数
 
-+ 
++ [函数基础](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Function#%E4%B8%80%E5%87%BD%E6%95%B0%E5%9F%BA%E7%A1%80)
++ [参数传递](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Function#%E4%BA%8C%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92)
++ [返回类型和return类型](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Function#%E4%B8%89%E8%BF%94%E5%9B%9E%E7%B1%BB%E5%9E%8B%E5%92%8Creturn%E7%B1%BB%E5%9E%8B)
++ [函数重载](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Function#%E5%9B%9B%E5%87%BD%E6%95%B0%E9%87%8D%E8%BD%BD)
++ [特殊用途语言特性](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Function#%E4%BA%94%E7%89%B9%E6%AE%8A%E7%94%A8%E9%80%94%E8%AF%AD%E8%A8%80%E7%89%B9%E6%80%A7)
++ [函数匹配](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Function#%E5%85%AD%E5%87%BD%E6%95%B0%E5%8C%B9%E9%85%8D)
++ [函数指针](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Function#%E4%B8%83%E5%87%BD%E6%95%B0%E6%8C%87%E9%92%88)
 
 ## 三.类
 
