@@ -30,11 +30,20 @@
 
 ## 三.类
 
-+ [定义抽象数据类型](#一定义抽象数据类型)
-+ [访问控制与封装](#二访问控制与封装)
-+ [类的其他特性](#三类的其他特性)
-+ [类的作用域](#四类的作用域)
-+ [构造函数再探](#五构造函数再探)
++ [定义抽象数据类型](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#%E4%B8%80%E5%AE%9A%E4%B9%89%E6%8A%BD%E8%B1%A1%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B)
++ [访问控制与封装](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#%E4%BA%8C%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E5%92%8C%E5%B0%81%E8%A3%85)
++ [类的其他特性](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#%E4%B8%89%E7%B1%BB%E7%9A%84%E5%85%B6%E4%BB%96%E7%89%B9%E6%80%A7)
+  + [类成员再探](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#1%E7%B1%BB%E6%88%90%E5%91%98%E5%86%8D%E6%8E%A2)
+  + [返回*this的成员函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#2%E8%BF%94%E5%9B%9Ethis%E7%9A%84%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0)
+  + [友元再探](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#3%E5%8F%8B%E5%85%83%E5%86%8D%E6%8E%A2)
++ [类的作用域](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#%E5%9B%9B%E7%B1%BB%E7%9A%84%E4%BD%9C%E7%94%A8%E5%9F%9F)
++ [构造函数再探](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#%E4%BA%94%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%86%8D%E6%8E%A2)
+  + [默认构造函数初始值列表](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#1%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%88%9D%E5%A7%8B%E5%80%BC%E5%88%97%E8%A1%A8)
+  + [委托构造函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#2%E5%A7%94%E6%89%98%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0)
+  + [默认构造函数的作用](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#3%E9%BB%98%E8%AE%A4%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%9A%84%E4%BD%9C%E7%94%A8)
+  + [聚合类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#4%E8%81%9A%E5%90%88%E7%B1%BB)
+  + [字面值常量类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#5%E5%AD%97%E9%9D%A2%E5%80%BC%E5%B8%B8%E9%87%8F%E7%B1%BB)
+  + [类的静态成员](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Class#6%E7%B1%BB%E7%9A%84%E9%9D%99%E6%80%81%E6%88%90%E5%91%98)
 
 ## 四.IO库
 
