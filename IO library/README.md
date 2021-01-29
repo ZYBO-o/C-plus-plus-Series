@@ -30,7 +30,7 @@
 - IO类之间的继承关系：
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/images/13.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/13.png"  width="600"/> 
   </div>
 
 ## 一.IO类
@@ -46,7 +46,7 @@
 - 表8.1是标准库中的这些IO类型和头文件
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/images/8.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/8.png"  width="600"/> 
   </div>
 
 - 声明一个类`继承`自另一个类，则通常可将`派生类`当作`基类`来使用
@@ -66,7 +66,7 @@
 - 表8.2定义的函数和标志可帮助访问和操纵流的`条件状态`
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/images/9.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/9.png"  width="600"/> 
   </div>
 
 - 表8.2中，定义了一个机器无关（？）的`iostate`类型，可表达流的状态，这个类型是`标志位`的集合
@@ -154,7 +154,7 @@ bad data, try again
 - 表8.3是fstream中比iostream新增的成员 
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/images/10.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/10.png"  width="600"/> 
   </div>
 
 ### 1.使用文件流对象
@@ -195,7 +195,7 @@ int main(){
 + 表8.4定义了每个文件流都有一个关联的`文件模式`，用来指出如何使用文件
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/images/11.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/11.png"  width="600"/> 
   </div>
 
 - 用open打开文件或用文件名构造文件流对象时，都可指定文件模式
@@ -243,7 +243,7 @@ int main(){
 - 表8.5是sstream中定义的类型的特有操作
 
 <div align="center">  
-  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/images/12.png"  width="600"/> 
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/12.png"  width="600"/> 
 </div>
 
 
