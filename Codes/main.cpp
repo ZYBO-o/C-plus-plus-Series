@@ -3,30 +3,38 @@
 #include<iostream>
 using namespace std;
 
-double sum(initializer_list<double> il){
-    double sum = 0;
-    for (auto tmp : il)
-        sum += tmp;
-    return sum;
-}
-
-double average(const initializer_list<double> &ril){
-    if (ril.size() > 0){
-        double sum = 0;
-        for (auto tmp : ril)
-            sum += tmp;
-        return sum / ril.size();
+class Sales_date
+{
+public:
+    Sales_date(string s, unsigned int cnt, double price):bookNo(s), count(cnt), revenue(price)
+    {
+        cout<< "This is pure function" << endl;
     }
-    return 0.0;
-}
+
+    Sales_date(): Sales_date("",0,0)
+    {
+        cout<< "This is function1" << endl;
+    }
+
+    Sales_date(string s): Sales_date(s,0,0)
+    {
+        cout<< "This is function2" << endl;
+    }
+    Sales_date(istream &is): Sales_date()
+    {
+        cout<< "This is function3" << endl;
+    }
+    
+private:
+    string bookNo;
+    unsigned int count;
+    double revenue;
+};
 
 int main(){
-    cout << "sum:" << sum({ 2, 3, 4 }) << ", ave:" << average({ 2.0, 3, 4 }) << endl;
-    initializer_list<double> dl = { 1.5, 2.5, 3.5, 4.5, 5.5 };
-    cout << "sum:" << sum(dl) << ", ave:" << average(dl) << endl;
-    dl = { 1, 2, 3, 4, 5, 6 };
-    cout << "sum:" << sum(dl) << ", ave:" << average(dl) << endl;
-    system("pause");
+
+    Sales_date s;
+    Sales_date s1("hello");
 }
 
     /*
