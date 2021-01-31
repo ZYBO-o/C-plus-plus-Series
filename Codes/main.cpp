@@ -1,40 +1,25 @@
 
 //arctanx函数
 #include<iostream>
+#include <fstream>
 using namespace std;
 
-class Sales_date
-{
-public:
-    Sales_date(string s, unsigned int cnt, double price):bookNo(s), count(cnt), revenue(price)
-    {
-        cout<< "This is pure function" << endl;
-    }
-
-    Sales_date(): Sales_date("",0,0)
-    {
-        cout<< "This is function1" << endl;
-    }
-
-    Sales_date(string s): Sales_date(s,0,0)
-    {
-        cout<< "This is function2" << endl;
-    }
-    Sales_date(istream &is): Sales_date()
-    {
-        cout<< "This is function3" << endl;
-    }
-    
-private:
-    string bookNo;
-    unsigned int count;
-    double revenue;
-};
-
 int main(){
+    ofstream outfile("test.txt");
+    if (outfile)
+        outfile << "This is a test text file" << endl;
+    outfile.close();
 
-    Sales_date s;
-    Sales_date s1("hello");
+    string filename = "one.txt";
+    ifstream infile(filename);
+    string line;
+    if(infile)
+    {
+        while (infile >> line)
+            cout << line << endl;
+    }
+    infile.close();
+    return 0;
 }
 
     /*
