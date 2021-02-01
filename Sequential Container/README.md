@@ -154,7 +154,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + 表9.4的`赋值`相关操作可用于所有容器。赋值运算符将左边容器中的所有元素替换为右边容器中元素的`拷贝`
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/16.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/16.png"  width="600"/> 
   </div>
 
 + 赋值前两容器大小可不同，赋值后大小都等于右边容器的大小
@@ -219,7 +219,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - 表9.5是向顺序容器添加元素的操作：
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/17.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/17.png"  width="600"/> 
   </div>
 
 - 在vector/string尾部之外的任何位置，或deque首尾之外的任何位置添加元素，都需要移动大量元素。且向vector/string添加元素可能引起整个容器存储空间重新分配
@@ -263,7 +263,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + 表9.6是顺序容器中访问元素的操作
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/18.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/18.png"  width="600"/> 
   </div>
 
 - 若访问处没有元素，则结果未定义
@@ -298,7 +298,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + 表9.7是顺序容器删除元素的操作，除array外
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/19.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/19.png"  width="600"/> 
   </div>
 
 - `pop_front`和`pop_back`成员函数分别删除首元素和尾元素
@@ -315,7 +315,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + 表9.8是forward_list的插入/删除操作
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/20.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/20.png"  width="600"/> 
   </div>
 
 - 对forward_list（单向链表）的元素做插入/删除，需要知道其`前驱`。
@@ -349,7 +349,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + 如表9.9是用`resize`改变大小的操作，不支持array
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/21.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/21.png"  width="600"/> 
   </div>
 
 - 对于给定的目标大小，若比当前大小更小，则容器后面的元素都被删除，若比当前大小更大，则将`值初始化`的新元素添加到容器尾部。可以指定值初始化的初始值
@@ -407,7 +407,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - 表9.10提供了vector内存大小管理的操作
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/22.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/22.png"  width="600"/> 
   </div>
 
 - `capacity`操作告诉我们容器在不扩张内存时最多还能容纳多少元素
@@ -439,7 +439,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + 表9.11是string特有的3个`构造函数`
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/23.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/23.png"  width="600"/> 
   </div>
 
 + 这些构造函数接受`string`或`const char *`参数作为源，还接受（可选的）指定拷贝多少个字符的参数。当源为string时，还可给定下标来指定从哪里开始拷贝
@@ -451,7 +451,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + substring操作（表9.12）返回string，其值是原始string的一部分或全部的拷贝。可传递可选的起始位置和计数值。
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/24.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/24.png"  width="600"/> 
   </div>
 
 ### 2.改变string的其他方法
@@ -459,7 +459,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + 表9.13定义了string特有的insert/erase/assign操作
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/25.png"  width="700"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/25.png"  width="700"/> 
   </div>
 
 - string的`insert/erase`可接受下标，用于指定insert到指定值之前的位置，或是开始删除的位置。
@@ -513,7 +513,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 + 如表9.14，string提供了6个搜索函数，每个函数有4个重载版本
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/26.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/26.png"  width="600"/> 
   </div>
 
 + 每个搜索操作都返回`string::size_type`类型值，表示匹配位置的下标。
@@ -553,15 +553,16 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - 表9.15是compare函数接受的参数
 
 <div align="center">  
-  <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/27.png"  width="600"/> 
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/27.png"  width="600"/> 
 </div>
+
 
 ### 5. 数值转换
 
 + 表9.16规定了数值数据和string间的转换
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/28.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/28.png"  width="600"/> 
   </div>
 
 - `to_string`将数值类型转为对应的string表示，其他各函数将string表示转为相应的数值类型
@@ -578,7 +579,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - 表9.17定义了所有容器适配器都支持的操作和类型
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/29.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/29.png"  width="600"/> 
   </div>
 
 - 每个适配器都有两个构造函数：
@@ -599,7 +600,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - stack定义于`stack头文件`中，其特有操作如表9.18
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/30.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/30.png"  width="600"/> 
   </div>
 
 - 每个适配器都基于底层容器定义了自己的特殊操作，只可用适配器操作，不可用底层容器操作
@@ -607,7 +608,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - queue和priority_queue定义于`queue头文件`中，其特有操作如表9.19
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/31.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/31.png"  width="600"/> 
   </div>
 
 - priority_queue允许为队列中的元素建立优先级，新加入的元素会排在所有优先级比它低的已有元素之前。默认情况下使用元素类型的`<`运算符来确定优先级
