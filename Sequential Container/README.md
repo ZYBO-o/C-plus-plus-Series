@@ -24,8 +24,9 @@
 + 非顺序访问容器中元素的代价
 
 <div align="center">  
-  <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/7.png"  width="600"/> 
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/7.png"  width="600"/> 
 </div>
+
 
 + 存储元素的策略影响容器的操作效率，甚至限制容器的某些操作
 + 只有`array`大小固定，其他容器都允许扩张和收缩，且高效
@@ -67,7 +68,7 @@
 - 表9.2是所有容器都支持的通用操作
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/14.png"  width="700"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/14.png"  width="700"/> 
   </div>
 
 ### 1.迭代器
@@ -104,7 +105,7 @@
 - 表9.3是容器的定义和初始化方法
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-Series/blob/main/C%2B%2B%20Primer/images/15.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/15.png"  width="600"/> 
   </div>
 
 + 将一个新容器创建为另一个容器的拷贝，方法有2种：
