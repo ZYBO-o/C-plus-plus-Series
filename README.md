@@ -153,7 +153,29 @@
 
 ##五.顺序容器
 
-+ 
++ [顺序容器概述](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#%E4%B8%80%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8%E6%A6%82%E8%BF%B0)
++ [容器库概览](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#%E4%BA%8C%E5%AE%B9%E5%99%A8%E5%BA%93%E6%A6%82%E8%A7%88)
+  + [迭代器](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#1%E8%BF%AD%E4%BB%A3%E5%99%A8)
+  + [容器类型成员](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#2%E5%AE%B9%E5%99%A8%E7%B1%BB%E5%9E%8B%E6%88%90%E5%91%98)
+  + [begin和end成员](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#3begin%E5%92%8Cend%E6%88%90%E5%91%98)
+  + [容器定义和初始化](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#4%E5%AE%B9%E5%99%A8%E5%AE%9A%E4%B9%89%E5%92%8C%E5%88%9D%E5%A7%8B%E5%8C%96)
+  + [赋值与swap](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#5%E8%B5%8B%E5%80%BC%E4%B8%8Eswap)
+  + [容器大小操作](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#6%E5%AE%B9%E5%99%A8%E5%A4%A7%E5%B0%8F%E6%93%8D%E4%BD%9C)
++ [顺序容器操作](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#%E4%B8%89%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8%E6%93%8D%E4%BD%9C)
+  + [添加元素](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#1%E5%90%91%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8%E6%B7%BB%E5%8A%A0%E5%85%83%E7%B4%A0)
+  + [访问元素](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#2%E8%AE%BF%E9%97%AE%E5%85%83%E7%B4%A0)
+  + [删除元素](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#3%E5%88%A0%E9%99%A4%E5%85%83%E7%B4%A0)
+  + [特殊的forword_list操作](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#4%E7%89%B9%E6%AE%8A%E7%9A%84forward_list%E6%93%8D%E4%BD%9C)
+  + [改变容器大小](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#5%E6%94%B9%E5%8F%98%E5%AE%B9%E5%99%A8%E7%9A%84%E5%A4%A7%E5%B0%8F)
+  + [容器操作对迭代器的影响](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#6%E5%AE%B9%E5%99%A8%E6%93%8D%E4%BD%9C%E5%8F%AF%E8%83%BD%E4%BD%BF%E8%BF%AD%E4%BB%A3%E5%99%A8%E5%A4%B1%E6%95%88)
++ [vector对象是如何增长的](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#%E5%9B%9B-vector%E5%AF%B9%E8%B1%A1%E6%98%AF%E5%A6%82%E4%BD%95%E5%A2%9E%E9%95%BF%E7%9A%84)
++ [额外的string操作](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#%E4%BA%94%E9%A2%9D%E5%A4%96%E7%9A%84string%E6%93%8D%E4%BD%9C)
+  + [构造string的其他方法](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#1%E6%9E%84%E9%80%A0string%E7%9A%84%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95)
+  + [改变string的其他方法](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#2%E6%94%B9%E5%8F%98string%E7%9A%84%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95)
+  + [string搜索操作](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#3string-%E6%90%9C%E7%B4%A2%E6%93%8D%E4%BD%9C)
+  + [compare函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#4compare%E5%87%BD%E6%95%B0)
+  + [数值转换](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#5-%E6%95%B0%E5%80%BC%E8%BD%AC%E6%8D%A2)
++ [容器适配器](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#%E5%85%AD-%E5%AE%B9%E5%99%A8%E9%80%82%E9%85%8D%E5%99%A8)
 
 ## 六.泛型编程
 
