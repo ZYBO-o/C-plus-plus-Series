@@ -5,24 +5,38 @@
 #include <vector>
 using namespace std;
 
+//9.22
 
-vector<int>::iterator search_vec(vector<int>::iterator  beg, vector<int>::iterator end, int value)
-{
-    while (beg != end)
-        if(*beg == value)
-            return beg;
-        else
-            beg++;
-    return end;
-}
+
 
 int main(){
-    vector<int> Array {1,2,3,4,5,6,7,8,9};
+    vector<int> Array ;
 
-    cout <<  search_vec(Array.begin(), Array.end(), 5) - Array.begin() << endl;
+    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
 
-    return 0;
+    for (vector<int>::size_type num= 0;  num < 24; num++) {
+        Array.push_back(num);
+    }
+
+    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+
+    Array.reserve(50);
+
+    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+
+    while (Array.size() != Array.capacity())
+        Array.push_back(0);
+
+    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+
+    Array.push_back(51);
+
+    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+
+
 }
+
+
 
     /*
     const double p1 = 3.14;

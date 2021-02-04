@@ -236,9 +236,13 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - 只有当元素定义了相应的比较符时，才可用其比较容器
 - 容器的相等是用元素的`==`实现，其他关系运算符是用元素的`<`实现
 
+
+
 ## 三.顺序容器操作
 
-- 顺序容器和关联容器的不同之处在于它们组织元素的方式。`顺序容器`中元素的顺序与其加入容器的位置对应，`关联容器`中元素的顺序由其关联的关键字决定
+- 顺序容器和关联容器的不同之处在于它们组织元素的方式。
+  + `顺序容器`中元素的顺序与其加入容器的位置对应
+  + `关联容器`中元素的顺序由其关联的关键字决定
 
 ### 1.向顺序容器添加元素
 
@@ -258,9 +262,9 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 
 - `push_front`：在头部插入元素。list、forward_list、deque容器支持push_front
 
-- `insert`：在任意位置插入0个/多个元素。vector、string、deque、list都支持insert。forward_list提供了特殊的insert
+- `insert`：在任意位置插入0个/多个元素，插入在迭代器之前的位置。vector、string、deque、list都支持insert。forward_list提供了特殊的insert
 
-- vector/string虽不可用push_front，但可用insert在头部插入
+- vector/string虽不可用push_front，但可用insert在头部进行插入操作：`svec.inster(svec.begin(),"Hello")`。
 
 - insert接受迭代器作为第一个参数，指定插入的位置，在该`迭代器之前`插入。在之前是为了考虑左闭右开区间。
 
@@ -268,7 +272,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 
   - 给一个`值`
   - 给`个数和值`，插入多个该值
-  - 给一对`迭代器范围`，将此范围内的迭代器插入。此范围不可来自被插入容器
+  - 给一对`迭代器范围`，将此范围内的迭代器插入。 **此范围不可来自被插入容器**
   - 给一个`initializer_list/花括号列表`
 
 - C++11中，接受元素个数或迭代器范围的insert可返回指向`第一个新加入元素`的迭代器。如范围为空，则不插入，返回insert的第一个参数。该设计是为了重复插入
@@ -283,8 +287,22 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
   ```
 
 - C++11引入新成员`emplace_front`、`emplace_back`、`emplace`，分别对应`push_front`、`push_back`、`insert`。区别是`emplace`是在原地构造元素，而push/insert是拷贝元素
+
 - push/insert可能会创建局部的临时量，再将临时量拷贝到容器
+
 - 调用`emplace`时，它将参数传递给元素类型的构造函数，使用它们在容器的内存空间中直接构造元素。故`emplace的参数需对应到元素的构造函数参数`
+
+```c++
+//在c的末尾构造一个Sales_data对象
+//使用三个参数的Sales_data构造函数
+c.emplace_back("12345678",25,15.99);
+//错误：没有接受三个参数的push_back版本
+c.push_back("12345678",25,15.99);
+//正确：创建一个临时的Sales_data对象传递给push_back
+c.push_back(Sales_data("12345678",25,15.99));
+```
+
+
 
 ### 2.访问元素
 
@@ -340,6 +358,8 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 
 ###  4.特殊的forward_list操作
 
+> 当添加或删除元素时，需要访问它的前驱，以便改变前驱的链接。但是forward_list是单向链表，没有简单的方法来获得元素的前驱。所以添加或删除操作是通过改变给定元素之后的元素来完成的。
+
 + 表9.8是forward_list的插入/删除操作
 
   <div align="center">  
@@ -354,7 +374,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 
 - forward_list定义了`before_begin`迭代器，它指向首元素之前，称为`首前迭代器`
 
-- 使用forward_list时需关注两个元素：我们要处理的元素，和它的前驱
+- **使用forward_list时需关注两个元素：我们要处理的元素，和它的前驱**
 
 - 例子：用两个迭代器操作forward_list
 
@@ -380,7 +400,10 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
     <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/21.png"  width="600"/> 
   </div>
 
-- 对于给定的目标大小，若比当前大小更小，则容器后面的元素都被删除，若比当前大小更大，则将`值初始化`的新元素添加到容器尾部。可以指定值初始化的初始值
+- 对于给定的目标大小，若比当前大小更小，则容器后面的元素都被删除，若比当前大小更大，则将`值初始化`的新元素添加到容器尾部。
+- 如果容器保存的是类类型，且resize向容器中添加新元素，则必须提供初始值，或者元素类型必须提供一个默认构造函数。
+
+
 
 ### 6.容器操作可能使迭代器失效
 
@@ -459,6 +482,35 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - vector采用的`内存扩张策略`一般是：在每次需要分配新空间时，将当前容量翻倍。但具体实现可使用不同策略
 
 - 所有扩张策略都应遵循的原则：确保用`push_back`添加元素有高效率。即，在初始为空的vector上调用n次push_back，花费时间不应超过n的常数倍
+
+```c++
+vector<int> Array ;
+//size应该为0，capacity的值依赖于具体实现
+cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+//向Array容器中添加24个元素
+for (vector<int>::size_type num= 0;  num < 24; num++) {
+		Array.push_back(num);
+}
+cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+//预分配的内存修改为50
+Array.reserve(50);
+cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+//向剩余内存中填值
+while (Array.size() != Array.capacity())
+		Array.push_back(0);
+cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+//再一次填入值
+Array.push_back(51);
+cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
+//****************输出内容*****************
+Array size : 0 capacity : 0
+Array size : 24 capacity : 32
+Array size : 24 capacity : 50
+Array size : 50 capacity : 50
+Array size : 51 capacity : 100
+```
+
+
 
 ## 五.额外的string操作
 
@@ -598,7 +650,9 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 - 如string不能转为指定的数值类型，这些函数抛出`invalid_argument`异常
 - 如转换得到的数值无法用任何类型表示，则抛出`out_of_range`异常
 
-### 6. 容器适配器
+
+
+## 六. 容器适配器
 
 - `适配器`是一种机制，能使某种事物的行为看起来像另一种事物。一个`容器适配器`接受一种已有的容器类型，使其看起来像另一种不同类型
 
