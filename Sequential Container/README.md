@@ -528,6 +528,38 @@ Array size : 51 capacity : 100
 
 + **使用`const char *`构造string时，字符数组必须以空字符`\0`结尾，用于停止拷贝**。但若给定拷贝大小的计数值，则只需不越界，不需空字符结尾。
 
+```c++
+const char *cp = "Hello world";
+char noNull[] = {'H','O'};
+
+string string1(cp);
+cout << string1 << endl;
+
+string string2(noNull, 2);
+cout << string2 << endl;
+
+//未定义：noNull不是空字符结尾的
+string string3(noNull, 3);
+cout << string3 << endl;
+
+//字符串类型和string类型的对比
+string string4(cp, 3);
+cout << string4 << endl;
+string string5(string1, 3);
+cout << string5 << endl;
+
+string string6(string1, 3, 20);
+cout << string6 << endl;
+
+//******************输出结果********************
+Hello world
+HO
+HOD
+Hel
+lo world
+lo world
+```
+
 + 使用`string`构造string时，可提供开始位置和计数值。开始位置必须小于等于源string大小，否则out_of_range异常。不管要求拷贝多少，最多拷到源string结尾。
 
 + substring操作（表9.12）返回string，其值是原始string的一部分或全部的拷贝。可传递可选的起始位置和计数值。
@@ -678,8 +710,8 @@ Array size : 51 capacity : 100
   - 不能基于array，因为要添加/删除元素
   - 不能基于forward_list，因为要访问尾元素
   - `stack`要求`back`、`push_back`、`pop_back`操作，故可构建于除array/forward_list外的所有容器
-  - `queue`要求`back`、`push_back`、`front`、`push_front`，故可构建于list/deque
-  - `priority_queue`要求`front`、`push_back`、`pop_back`、`随机访问`，故可构建于vector/deque
+  - `queue`要求`back`、`push_back`、`front`、`push_front`，故可构建于list/deque，不可基于vector
+  - `priority_queue`要求`front`、`push_back`、`pop_back`、`随机访问`，故可构建于vector/deque，不能基于list
 
 - stack定义于`stack头文件`中，其特有操作如表9.18
 

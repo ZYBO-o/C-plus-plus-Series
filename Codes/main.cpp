@@ -10,28 +10,6 @@ using namespace std;
 
 
 int main(){
-    vector<int> Array ;
-
-    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
-
-    for (vector<int>::size_type num= 0;  num < 24; num++) {
-        Array.push_back(num);
-    }
-
-    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
-
-    Array.reserve(50);
-
-    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
-
-    while (Array.size() != Array.capacity())
-        Array.push_back(0);
-
-    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
-
-    Array.push_back(51);
-
-    cout << "Array size : " << Array.size() << " capacity : " << Array.capacity() << endl;
 
 
 }
@@ -70,6 +48,7 @@ int main(){
     double * const ptr5 = &p3;
 
      */
+
 
 
 
