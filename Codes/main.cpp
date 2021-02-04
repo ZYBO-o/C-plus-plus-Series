@@ -2,23 +2,25 @@
 //arctanx函数
 #include<iostream>
 #include <fstream>
+#include <vector>
 using namespace std;
 
-int main(){
-    ofstream outfile("test.txt");
-    if (outfile)
-        outfile << "This is a test text file" << endl;
-    outfile.close();
 
-    string filename = "one.txt";
-    ifstream infile(filename);
-    string line;
-    if(infile)
-    {
-        while (infile >> line)
-            cout << line << endl;
-    }
-    infile.close();
+vector<int>::iterator search_vec(vector<int>::iterator  beg, vector<int>::iterator end, int value)
+{
+    while (beg != end)
+        if(*beg == value)
+            return beg;
+        else
+            beg++;
+    return end;
+}
+
+int main(){
+    vector<int> Array {1,2,3,4,5,6,7,8,9};
+
+    cout <<  search_vec(Array.begin(), Array.end(), 5) - Array.begin() << endl;
+
     return 0;
 }
 
@@ -56,15 +58,5 @@ int main(){
      */
 
 
-/***
-//将8位二进制数字转换为十进制数字
-#include<iostream>
-using namespace std;
-double power(double x,int n);//计算x的n次方
-int main(){
 
-    return 0;
-}
-
-***/
 

@@ -3,4 +3,4 @@ project(Codes)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(Codes main.cpp)
+add_executable(Codes main.cpp Sequential_Container.h)

@@ -80,6 +80,9 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/Codes/Sequential_Container.h">
+			<Option target="Codes"/>
+		</Unit>
 		<Unit filename="/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/Codes/main.cpp">
 			<Option target="Codes"/>
 		</Unit>
