@@ -13,4 +13,12 @@ fstream
 -
 vector
 -
+algorithm
+-
+numeric
+-
+list
+-
+functional
+-
 
