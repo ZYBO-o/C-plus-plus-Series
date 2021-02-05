@@ -418,7 +418,7 @@ void print_strings(vector<strin> &words, ostream &os=cout, char c=' '){
 + 表10.1是lambda捕获列表可能的状态
 
 <div align="center">  
-  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/33.png"  width="600"/> 
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/33png.png"  width="600"/> 
 </div>
 
 #### 可变lambda
@@ -572,15 +572,169 @@ for_each(words.begin(),words.end(),
 
 ### 1. 插入迭代器
 
+- `插入器`是一种`迭代器适配器`，它接受一个容器，生成一个迭代器，可通过该迭代器向容器添加元素。
+
+- 通过插入迭代器赋值时，该迭代器调用对应的容器操作来向给定位置插入元素
+
+- 插入迭代器支持的操作见表10.2
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/34.png"  width="600"/> 
+  </div>
+
+- 有3种插入迭代器，区别在于插入的位置：
+
+  - `back_inserter`函数：创建一个使用`push_back`的迭代器。
+  - `front_inserter`函数：创建一个使用`push_front`的迭代器。
+  - `inserter`函数：创建一个使用`insert`的迭代器。它接受迭代器作为第二个参数来指定位置。使用返回的迭代器时，插入的元素在指定位置之前
+
+- 只有容器本身支持push_back/push_front/insert，才可用back_inserter/front_inserter/inserter
+
+- inserter等价于两步操作：先`insert`后`++`：
+
+  ```c++
+  auto it=inserter(c,iter);   //iter是it的初始位置
+  *it=val;
+  //上一行等价于下两行
+  it=c.insert(it,val);        //先在it前插入，之后it指向插入元素。
+  ++it;    
+  ```
+
+- 反复调用front_inserter插入元素的顺序与插入顺序相反，而back_inserter/inserter插入元素的顺序与插入顺序相同
+
+  ```c++
+  list<int> l1 {1,2,3,4};
+  list<int> l2,l3;
+  
+  copy(l1.begin(),l1.end(),front_inserter(l2));
+  
+  copy(l1.begin(),l1.end(),inserter(l3,l3.begin()));
+  
+  for (int i : l2)
+  	cout << i << " ";
+  cout << endl;
+  for (int i : l3)
+  	cout << i << " ";
+  cout << endl;
+  //*********输出**********
+  4 3 2 1 
+  1 2 3 4 
+  ```
+
+- 插入迭代器的`*`和`++`算符不会对迭代器做任何事。
+
+### 2.iostream迭代器
+
++ iostream类型不是容器，但也可用迭代器操作：
+
+  - `istream_iterator`：读输入流
+  - `ostream_iterator`：写输出流
+
+  > 这些迭代器将它们对应的流当做一个特定类型的元素序列来处理。通过使用流迭代器，可以用泛型算法从流对象读取数据以及向他们写入数据。
+
+#### istream_iterator操作
+
+- 创建流迭代器时需在模板参数中指定读写类型，使用时调用该类型的`<<`、`>>`算符。流迭代器将其对应的流当作该类型的元素序列处理
+- 创建istream_iterator时，可将其绑定到一个流。也可默认初始化为`尾后迭代器`。
+- 对于绑定到流的迭代器，一旦关联的流遇到文件末尾或IO错误，则迭代器等于尾后迭代器
+- 例子：使用istream_iterator
+
+```c++
+istream_iterator<int> in_iter(cin), eof;    //in_iter绑定到cin，eof作为输入流的尾后迭代器
+//法1：先创建vector再依次读取数据、插入
+vector<int> vec;
+while(in_iter!=eof)
+    vec.push_back(*in_iter++);              //用迭代器从cin中读数据
+//法2：直接用输入流迭代器创建vector
+vector<int> vec(in_iter,eof);               //等价于上面3行
+```
+
+- 标准库只保证在第一次解引用输入流迭代器之前完成从流中读数据的操作，而不一定在绑定时立即读取。如果从两个不同对象同步地读取一个流，或是创建流迭代器还未使用就销毁，则何时读取是重要的。
+- istream_iterator的操作见表10.3
+
+<div align="center">  
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/37.png"  width="600"/> 
+</div>
+
+- 例子：用算法操作流迭代器
+
+```c++
+istream_iterator<int> in(cin), eof;
+cout<<accumulate(in,eof,0)<<endl;   //将输入序列读为int并累加输出
+```
+
+#### ostream_iterator操作
+
+- 创建ostream_iterator时有可选的第二个参数，必须是C风格字符串，在输出每个元素之后都输出该字符串。
+- ostream_iterator创建时必须绑定到流，不允许默认初始化
+- ostream_iterator的`*`和`++`算符不会对迭代器做任何事，因为输出操作自动递增。
+- ostream_iterator的操作见表10.4
+
+<div align="center">  
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/38.png"  width="600"/> 
+</div>
+
+- 例子：使用ostream_iterator
+
+```c++
+ostream_iterator<int> out_iter(cout," ");
+//法1：显式写出解引用和递增
+for (auto e:vec)
+    *out_iter++=e;
+//法2：流自动解引用和递增
+for (auto e:vec)
+    out_iter=e;
+//法3：直接向流中拷贝
+copy(vec.begin(),vec.end(),out_iter);
+```
 
 
 
+### 3.反向迭代器
 
+- `反向迭代器`：在容器中从尾元素向首前元素移动，`++`向后移动，`--`向前移动
+- 除forward_list外的容器都有反向迭代器。可通过`rbgein`、`crbegin`、`rend`、`crend`函数来得到指向首前元素和尾元素的迭代器，如图10.1。
 
+<div align="center">  
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/35.png"  width="600"/> 
+</div>
 
+- 反向迭代器的作用是让算法透明地向前或向后处理容器，例如向sort传递反向迭代器可反向排序而不需修改算法或算符
+- 例子：用反向迭代器做反向排序
 
+```c++
+sort(vec.begin(),vec.end());    //递增序
+sort(vec.rbegin(),vec.rend());  //递减序
+```
 
+- 反向迭代器只能从同时支持`++`和`--`的迭代器来产生。故`forward_list`和`流迭代器`都无反向迭代器
 
+- 反向迭代器只能从同时支持`++`和`--`的迭代器来产生。故`forward_list`和`流迭代器`都无反向迭代器
+
+- 反向迭代器的`base`成员函数返回它对应的正向迭代器。特别的，rbegin对应的正向迭代器是end，rend对应的正向迭代器是begin
+
+- 反向迭代器比它对应的正向迭代器左偏一个位置，原因是左闭右开区间的特性。为了使`[rit1,rit2)`和`[rit1.base(),rit2.base())`表示的元素范围相同
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/36.png"  width="600"/> 
+  </div>
+
+- 从正向迭代器初始化反向迭代器，或是给反向迭代器赋值时，结果迭代器与原迭代器指向的元素不相同。
+
+- 例子：使用反向迭代器
+
+```c++
+string line="FIRST,MIDDLE,LAST";
+//检测第一个','并打印
+auto comma=find(line.cbegin(),line.cend(),',');     //检测第一个`,`
+cout<<string(line.cbegin(),comma)<<endl;            //打印"FIRST"
+//检测最后一个','并打印
+auto rcomma=find(line.crbegin(),line.crend(),',');  //检测最后一个`,`，只需修改迭代器类型，不需修改算法
+cout<<string(line.crbegin(),rcomma)<<endl;          //打印"TSAL"
+cout<<string(rcomma.base(),line.cend())<<endl;      //打印"LAST"
+```
+
+>  上例中`[line.crbegin(),rcomma)`和`[rcomma.base(),line.cend())`表示的范围相同，只是方向相反
 
 
 
