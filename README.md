@@ -179,7 +179,21 @@
 
 ## 六.泛型编程
 
-+ 
++ [概述](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#%E4%B8%80%E6%A6%82%E8%BF%B0)
++ [初试泛型算法](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#%E4%BA%8C%E5%88%9D%E8%AF%95%E6%B3%9B%E5%9E%8B%E7%AE%97%E6%B3%95)
+  + [只读算法](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#1%E5%8F%AA%E8%AF%BB%E7%AE%97%E6%B3%95)
+  + [写容器元素的算法](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#%E4%BA%8C%E5%86%99%E5%AE%B9%E5%99%A8%E5%85%83%E7%B4%A0%E7%9A%84%E7%AE%97%E6%B3%95)
+  + [重排容器元素的算法](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#3%E9%87%8D%E6%8E%92%E5%AE%B9%E5%99%A8%E5%85%83%E7%B4%A0%E7%9A%84%E7%AE%97%E6%B3%95)
++ [定制操作](#三定制操作)
+  + [向算法传递参数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#1%E5%90%91%E7%AE%97%E6%B3%95%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0)
+  + [lambda](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#2lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F)
+  + [参数绑定](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#3%E5%8F%82%E6%95%B0%E7%BB%91%E5%AE%9A)
++ [再探迭代器](#四再探迭代器)
+  + [插入迭代器](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#1-%E6%8F%92%E5%85%A5%E8%BF%AD%E4%BB%A3%E5%99%A8)
+  + [iostream迭代器](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#2iostream%E8%BF%AD%E4%BB%A3%E5%99%A8)
+  + [反向迭代器](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Generic%20Algorithm#3%E5%8F%8D%E5%90%91%E8%BF%AD%E4%BB%A3%E5%99%A8)
++ [泛型算法结构](#五泛型算法结构)
++ [特定容器算法](#六特定容器算法)
 
 ## 七.关联容器
 
