@@ -9,6 +9,7 @@
 #include <functional>
 #include <iterator>
 #include <set>
+#include <map>
 using namespace std;
 
 //9.22
@@ -60,42 +61,14 @@ void biggies(vector<string> &words, vector<string>::size_type sz){
 
 int main(){
 
-    list<int> l1 {1,2,3,4};
-    list<int> l2 {10,20};
-    list<int> l3 {10,20};
+  map<string, size_t > word_count;
+  string word;
+  while (cin >> word)
+      ++word_count[word];
 
-
-    copy(l1.begin(),l1.end(),front_inserter(l2));
-
-    copy(l1.begin(),l1.end(),inserter(l3,l3.begin()));
-
-    for (int i : l2)
-        cout << i << " ";
-    cout << endl;
-    for (int i : l3)
-        cout << i << " ";
-    cout << endl;
-
-
-
-
-
-    /*
-    vector<string> words {"fox", "jumps", "the", "over", "turtle", "quick", "red", "red", "slow", "the"};
-    biggies(words,4);
-
-    auto wc = find_if(words.begin(), words.end(), bind(check_size, std::placeholders::_1, 4));
-
-    auto check6 = bind(check_size,std::placeholders::_1,6);
-    string s = "hello";
-
-    bool b1 = check6(s);
-
-    cout << b1 << endl;
-*/
-
-
-    //cout << words.end() - wc << endl;
+    for (const auto &w : word_count) {
+        cout << w.first << " occurs " << w.second << ((w.second > 1) ? " times!" : " time!") << endl;
+    }
 }
 
 
