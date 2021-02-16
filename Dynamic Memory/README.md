@@ -25,7 +25,22 @@
 - C++11标准库中提供了两种`智能指针`来管理动态对象，定义于`memory头`文件：
   - `shared_ptr`允许多个指针指向同一对象
   - `unique_ptr`指针独占所指向对象
-  - `weak_ptr`是伴随类，是一种弱引用，指向shared_ptr管理的对象
+  - `weak_ptr`是伴随类，是一种弱引用，指向 `shared_ptr` 管理的对象
+
+### 1.shared_ptr类
+
+- 智能指针也是模板类，创建时必须在模板参数中给定其指向的类型
+- 默认初始化的智能指针中保存空指针，条件判断中使用智能指针是判断其是否为空
+- 解引用智能指针返回其指向的对象
+- shared_ptr和unique_ptr都支持的操作见表12.1，shared_ptr独有的操作见表12.2
+
+<div align="center">  
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/50.png"  width="600"/> 
+</div>
+
+<div align="center">  
+  <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/51.png"  width="600"/> 
+</div>
 
 
 
