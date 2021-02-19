@@ -544,7 +544,21 @@ int main(){
 
 - 将weak_ptr绑定到shared_ptr指向的对象时，不会改变shared_ptr的引用计数，一旦该对象的shared_ptr引用计数清零，对象就会被释放，即使有weak_ptr指向它。
 
-- weak的用法如表12.5
+  ```c++
+  auto p = make_shared<int>(42);
+  cout << *p << endl;								//42
+  cout << p.use_count() << endl;		//1
+  shared_ptr<int> p2(p);
+  cout<< p2.use_count() << endl;		//2
+  weak_ptr<int> wp(p);
+  cout << wp.use_count() << endl;		//2
+  
+  p.reset();
+  p2.reset();
+  cout << wp.use_count() << endl;		//0
+  ```
+
+- weak_ptr的用法如表12.5
 
   <div align="center">  
     <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/54.png"  width="600"/> 
@@ -552,7 +566,21 @@ int main(){
 
 - 创建weak_ptr时要在模板参数中给出指向对象类型，并用shared_ptr来初始化。模板参数中的类型只需能转换为shared_ptr指向的类型即可，不需严格匹配
 
-- 由于weak_ptr的对象可能不存在，故不能用weak_ptr直接访问对象，而必须用`lock`成员函数。lock函数先检查指向对象是否存在，若存在则返回指向该对象的shared_ptr（与初始化weak_ptr的shared_ptr共享引用计数），不存在则返回空的shared_ptr
+- **由于weak_ptr的对象可能不存在，故不能用weak_ptr直接访问对象，而必须用`lock`成员函数。lock函数先检查指向对象是否存在，若存在则返回指向该对象的shared_ptr** （与初始化weak_ptr的shared_ptr共享引用计数），不存在则返回空的shared_ptr
+
+  ```c++
+  auto p = make_shared<int>(42);
+  cout << *p << endl;								//42
+  cout << p.use_count() << endl;		//1
+  shared_ptr<int> p2(p);
+  cout<< p2.use_count() << endl;		//2
+  weak_ptr<int> wp(p);
+  cout << wp.use_count() << endl;		//2
+  if(shared_ptr<int> np = wp.lock())
+  {
+  	cout<< np.use_count() << endl;	//3
+  }
+  ```
 
 - 例子：利用weak_ptr定义伴随指针类（类似迭代器），使用时不干涉底层对象的生存期，但在底层对象不存在时可阻止访问
 
@@ -630,17 +658,179 @@ int main(){
 
 ## 二.动态数组
 
-cd
+- new/delete一次只分配/释放一个对象，但有时需要一次为很多元素分配内存，如容器扩张时
+- 两种一次性分配一个`动态数组`的功能：
+  - C++语言提供：另一种`new表达式`，可分配并初始化一个动态数组
+  - 标准库提供：`allocator类`，可分配多个元素的内存，并将分配和初始化分离，性能更好更灵活
+- 最佳实践：应优先使用容器而不是动态数组来管理可变数量的对象
+- 使用容器的类可用默认版本的拷贝/赋值/析构来处理容器，而分配动态数组的类必须自定义拷贝/赋值/析构操作来处理动态数组
 
 ### 1.new和数组
+
+- 使用new分配动态数组，要在类型名后跟一对方括号`[]`，并在方括号中指明要分配对象的数目
+
+- 可用表示数组的类型别名来分配动态数组
+
+  ```c++
+  int *pia=new int[42];   //分配动态数组
+  typedef int arrT[42];
+  int *p=new arrT;        //用数组的类型别名来分配
+  ```
+
++ new分配动态数组时，并未得到数组类型的对象，而是返回指向该数组的指针。
+
++ 由于new返回的不是数组类型，故不能对动态数组使用begin和end，也不能用范围for
+
++ new动态数组的`初始化`：
+
+  - 默认情况下new分配的对象（单个或数组）都是`默认初始化`
+  - 可用花括号对动态数组做`列表初始化`。若列表过短则剩下的值初始化，列表过长则分配失败并抛出异常`bad_array_new_length`（定义于头文件`new`）
+  - 可用空的圆括号对动态数组做`值初始化`，括号内不能有值。不能用auto分配动态数组
+
++ 例子：new动态数组的初始化
+
+  ```c++
+  //默认初始化
+  int *pia=new int[10];
+  string *psa=new string[10];
+  //列表初始化
+  int *pia2=new int[10]{0,1,2,3,4,5,6,7,8,9};
+  string *psa2=new string[10]{"a","an","the",string(3,'x')};
+  //值初始化（不能在括号中给值）
+  int *pia3=new int[10]();
+  string *psa3=new string[10]();
+  ```
+
++ 用new分配大小为0的数组时，new返回一个合法的非空的指针，并保证该指针与new返回的任何其他指针都不同。对于长为0的数组，该指针类似尾后迭代器。
+
++ 释放动态数组时可用特殊形式的delete，在指针前加空的方括号`[]`
+
++ 动态数组中的元素按`逆序销毁`，即从最后一个元素开始
+
++ 若在delete动态数组时忽略了`[]`，或在delete单个对象时使用了`[]`，其行为都是未定义
+
++ 即使在new时使用类型别名导致new中没有`[]`，也要在delete中写`[]`
+
++ 例子：销毁动态数组
+
+  ```c++
+  typedef int arrT[42];
+  int *p=new arrT;
+  delete []p;
+  ```
+
++ `unique_ptr`可管理new分配的动态数组，只需在模板参数中指定类型为数组即可。unique_ptr销毁动态数组的方式是使用`delete []`
+
++ 例子：unique_ptr管理动态数组
+
+  ```c++
+  unique_ptr<int []> up(new int[10]); //在模板参数中指定为动态数组。由于是指针而不是数组，故不写大小
+  for(size_t i=0; i!=10; ++i)
+      up[i]=i;                        //下标访问unique_ptr管理的动态数组
+  up.release();                       //自动调用delete []
+  ```
+
++ 指向数组的unique_ptr操作如表12.6：
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/55.png"  width="600"/> 
+  </div>
+
+- unique_ptr指向动态数组时，不可使用点`.`和箭头`->`算符，因为指向的是数组而不是单个对象
+
+- unique_ptr指向动态数组时，可用下标`[]`访问元素
+
+- 若要使用shared_ptr管理动态数组，需提供`自定义delete`
+
+- shared_ptr未定义下标算符，且智能指针都不支持指针算数运算。故shared_ptr访问数组中元素时必须用get函数取出内置指针
+
+- 例子：shared_ptr管理动态数组
+
+  ```c++
+  shared_ptr<int> sp(new int[10],[](int *p){delete []p;});    //自定义lambda，使用delete []来释放
+  for(size_t i=0; i!=10; ++i)
+      *(sp.get()+i)=i;                            //使用get得到内置指针来访问元素
+  sp.reset();                                     //使用自定义的lambda释放动态数组
+  ```
 
 
 
 ### 2.allocator类
 
+- new/delete在灵活性上的局限：将内存分配和对象构造组合在一起，将对象析构和内存释放组合在一起
 
+- 分配一大块内存时，通常要按需构造对象。此时希望将内存分配和对象构造分离，只在真正需要时才构造对象
 
+- new的局限性：
 
+  - 分配空间时即构造对象，初始化之后再赋予新值，则每个元素被赋值两次
+  - 分配空间被对象填满，可能创建了一些永远不会使用的对象
+  - 没有默认构造函数的类不能用new分配动态数组
+
+- `allocator`类定义在`memory`头文件中，提供一种类型感知的内存分配，分配的内存是原始的、未构造的。它可将内存分配和对象构造分离，将对象销毁和内存释放分离。
+
+- allocator支持的操作见表12.7
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/56.png"  width="600"/> 
+  </div>
+
+- allocator也是模板类，需在模板参数中给出分配的对象类型。分配内存时根据给定的类型来确定恰当的内存大小和对齐位置
+
+- `allocate`成员函数接受一个参数，指定分配能容纳多少个该对象的内存
+
+- `construct`成员函数接受一个指针和额外参数，在指针所指位置构造一个元素，额外参数匹配到元素的构造函数
+
+- 为使用allocate分配的内存，必须用construct构造对象。使用未构造的内存是未定义
+
+- 早期的标准库construct只接受两个参数，一个指针和一个元素类型的值，只能把给定值拷贝进内存
+
+- 使用完对象后必须对每个对象调用`destroy`来销毁，该成员函数接受一个指针，执行所指元素的析构函数
+
+- 只能对真正构造了的元素进行destroy操作，对未构造的空间进行destroy是未定义
+
+- 使用destroy销毁元素后可以再构造元素，也可将内存还给系统
+
+- 使用`deallocate`成员函数释放内存，它接受两个参数，一个指向这块内存的指针和一个销毁元素的数量，该数量必须与allocate分配的数量相同（即只能全部释放）。
+
+- 例子：使用allocator
+
+  ```c++
+  allocator<string> alloc;
+  auto const p=alloc.allocate(n); //分配n个string的内存，返回首指针
+  auto q=p;                       //指向分配区域的起始
+  alloc.construct(q++);           //构造空字符串，指针推进
+  alloc.construct(q++,10,'c');    //构造字符串，指针推进
+  alloc.construct(q++,"hi");      //构造字符串，指针推进
+  cout<<*p<<endl;                 //有效，p指向区域起始，此处有对象
+  cout<<*q<<endl;                 //未定义，q指向已构造空间的尾后，此处无对象
+  while(q!=p)
+      alloc.destroy(--q);         //从尾部开始销毁元素
+  alloc.deallocate(p,n);          //释放所有内存
+  ```
+
++ 标准库为allocator类定义了两个`伴随算法`，用于在未初始化的内存中创建对象，它们定义于`memory`头文件中
+
++ allocator的伴随算法见表12.8
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/56.png"  width="600"/> 
+  </div>
+
+- uninitialized_copy类似copy，接受3个迭代器参数，前两个表示输入序列，第三个表示目的位置。目的位置必须是未构造的内存。该函数在目的位置构造元素，并返回已构造序列的尾后迭代器
+
+- uninitialized_fill_n类似fill_n，接受一个指向目的位置的指针、一个计数、一个值。该函数在目的位置创建给定个数目的对象，用给定值初始化
+
+- 例子：使用allocator的伴随算法
+
+  ```c++
+  allocator<int> alloc;
+  auto p=alloc.allocate(vi.size()*2);                 //分配vi长度两倍的内存
+  auto q=uninitialized_copy(vi.begin(),vi.end(),p);   //将vi拷贝进分配的内存，返回已拷贝区域的尾后迭代器
+  uninitialized_fill_n(q,vi.size(),42);               //剩下的内存初始化未42；
+  ```
+
+  
 
 ## 三.使用标准库，文本查询程序
 

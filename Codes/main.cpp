@@ -17,10 +17,13 @@ using namespace std;
 
 int main(){
 
-    int a = 2;
-    int *p = new int(a);
+    auto p = new int (0);
 
-    cout << *p << endl;
+    auto p1 = p;
+
+    for (int i = 0; i < 10; ++i) {
+        cout << p1[i] << endl;
+    }
 
 }
 
