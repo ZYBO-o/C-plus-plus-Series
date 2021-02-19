@@ -461,27 +461,170 @@ int main(){
 
 ### 5.unique_ptr
 
+- 同一个时刻只能有一个unique_ptr指向给定对象。若unique_ptr被销毁，其指向的对象也被销毁
+
+- unique_ptr的操作列于表12.4
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/53.png"  width="600"/> 
+  </div>
+
+- 定义unique_ptr时需将其绑定到一个new返回的指针上。类似shared_ptr，用内置指针初始化时必须显式构造，不可隐式转换
+
+- unique_ptr不支持拷贝/赋值，因为独占其管理的对象
+
+- 例子：unique_ptr不支持拷贝/赋值
+
+  ```c++
+  unique_ptr<string> p1(new string("Stegosaurus"));
+  unique_ptr<string> p2(p1);  //错，不可拷贝
+  unique_ptr<string> p3;
+  p3=p1;                      //错，不可赋值
+  ```
+
+- 可通过release/reset成员函数将指针所有权从一个（非const）unique_ptr转移给另一个unique_ptr
+
+  - `release`函数返回unique_ptr当前保存的指针，并将unique_ptr置为空
+  - `reset`函数将unique_ptr原来指向的对象被释放，并接受一个可选的内置指针参数，令unique_ptr重新指向给定的指针。
+
+- 例子：unique_ptr用release/reset转移权限
+
+  ```c++
+  unique_ptr<string> p1(new string("Stegosaurus"));
+  unique_ptr<string> p2(p1.release());    //将p1置空并将底层的内置指针交给p2管理
+  unique_ptr<string> p3(new string("Trex"));
+  p2.reset(p3.release());                 //释放p2管理的对象，将p3置空并将底层的内置指针交给p2管理
+  ```
+
+- 不能拷贝unique_ptr的规则有一个例外： **可以拷贝或赋值一个将要被编译器销毁的unique_ptr，这时编译器执行一种特殊的拷贝（`移动`）。例如可从函数中返回unique_ptr，也可返回局部unique_ptr对象的拷贝**
+
+- 例子：可拷贝将要被编译器销毁的unique_ptr
+
+  ```c++
+  //从函数中返回unique_ptr
+  unique_ptr<int> clone(int p){
+      return unique_ptr<int>(new int(p));
+  }
+  //返回局部unique_ptr对象的拷贝
+  unique_ptr<int> clone(int p){
+      unique_ptr<int> ret(new int(p));
+      return ret;
+  }
+  ```
+
+- unique_ptr默认用`delete`释放它指向的对象，也可`自定义delete`， **但unique_ptr管理删除器的方式和shared_ptr不同**
+
+- 重载unique_ptr的删除器会影响到unique_ptr类型以及如何构造（或reset）unique_ptr对象。因此必须在unique_ptr的模板参数中提供删除器函数的指针类型，构造或reset时需提供删除器。
+
+- 例子：自定义unique_ptr的delete
+
+  ```c++
+  //以下是C/C++兼容的网络库
+  struct destination;
+  struct connection;
+  connection connect(destination *);
+  void disconnect(connection);
+  //以下是使用这个库，unique_ptr管理连接
+  void end_connection(connection *p){disconnect(*p);} //自定义delete操作用于关闭连接
+  void f(destination &d){
+      connection c=connect(&d);
+      unique_ptr<connection,decltype(end_connection) *> 
+                p(&c,end_connection);                 //unique_ptr管理连接
+      /* 使用连接 */
+  }          
+  ```
+
+  > 必须添加一个`*`来指出我们正在使用该类型的一个指针
 
 
 
+### 6.weak_ptr
 
+- `weak_ptr`是一种不控制指向对象生存期的智能指针，它指向一个由shared_ptr管理的对象。
 
+- 将weak_ptr绑定到shared_ptr指向的对象时，不会改变shared_ptr的引用计数，一旦该对象的shared_ptr引用计数清零，对象就会被释放，即使有weak_ptr指向它。
 
+- weak的用法如表12.5
 
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/54.png"  width="600"/> 
+  </div>
 
+- 创建weak_ptr时要在模板参数中给出指向对象类型，并用shared_ptr来初始化。模板参数中的类型只需能转换为shared_ptr指向的类型即可，不需严格匹配
 
+- 由于weak_ptr的对象可能不存在，故不能用weak_ptr直接访问对象，而必须用`lock`成员函数。lock函数先检查指向对象是否存在，若存在则返回指向该对象的shared_ptr（与初始化weak_ptr的shared_ptr共享引用计数），不存在则返回空的shared_ptr
 
+- 例子：利用weak_ptr定义伴随指针类（类似迭代器），使用时不干涉底层对象的生存期，但在底层对象不存在时可阻止访问
 
-
-
-
-
-
-
-
-
-
-
+  ```c++
+  /* 上下文：前面例子中的StrBlob */
+  class StrBlobPtr{
+  public:
+      StrBlobPtr():curr(0){}
+      //用底层对象的shared_ptr初始化weak_ptr，在StrBlob中声明StrBlobPtr为友元才可访问
+      StrBlobPtr(StrBlob &a, size_t sz=0):wptr(a.data),curr(sz){}
+      //解引用，访问当前位置的元素
+      string &deref() const;
+      //前置递增，位置向前推进
+      StrBlobPtr &incr();
+  private:
+      //若检查成功，返回指向底层对象的shared_ptr
+      shared_ptr<vector<string>> check(size_t,const string &) const;
+      //weak_ptr指向底层对象
+      weak_ptr<vector<string>> wptr;
+      //当前位置
+      size_t curr;
+  };
+  //检查两项：1、底层对象是否还存在；2、索引是否越界
+  shared_ptr<vector<string>> StrBlobPtr::check(size_t i,const string &msg) const{
+      //使用weak_ptr检查对象是否存在
+      auto ret=wptr.lock();
+      if(!ret)
+          throw runtime_error("unbound StrBlobPtr");
+      if(i>=ret->size())              //size_t是无符号，下溢时自动变成最大值。故只需检查i>=size
+          throw out_of_range(msg);
+      return ret;
+  }
+  //解引用，访问当前位置的元素
+  string &StrBlobPtr::deref() const{
+      //检查当前位置是否合法，并返回shared_ptr
+      auto p=check(curr,"dereference past end");
+      //访问元素
+      return (*p)[curr];
+  }
+  //对位置进行前置递增
+  StrBlobPtr &StrBlobPtr::incr(){
+      check(curr,"increment past end of StrBlobPtr");
+      ++curr;
+      return *this;
+  }
+  //在StrBlob定义前加上这一行，前向声明StrBlobPtr
+  class StrBlobPtr;
+  //在StrBlob定义中加上如下几行，声明StrBlobPtr为友元，并提供返回StrBlobPtr的接口
+  friend class StrBlobPtr;
+  StrBlobPtr begin();
+  StrBlobPtr end();
+  //在StrBlobPtr完整定义后，实现从StrBlob中得到StrBlobPtr的函数，*this是用于初始化StrBlobPtr的StrBlob
+  StrBlobPtr StrBlob::begin(){return StrBlobPtr(*this);}
+  StrBlobPtr StrBlob::end(){
+      auto ret=StrBlobPtr(*this,data->size());
+      return ret;
+  }
+  /* 使用StrBlob和StrBlobPtr */
+  //定义一个StrBlob对象
+  StrBlob b1;                         //创建新StrBlob
+  {                                   //进入新作用域
+      StrBlob b2={"a","an","the"};    //初始化b2
+      b1=b2;                          //用b2初始化b1，它们共享底层数据
+  }                                   //离开作用域，b2被释放，b1仍存在，共享的底层数未丢失
+  //从StrBlob中得到StrBlobPtr
+  auto p1=b1.begin(), p2=b1.end();
+  //通过StrBlobPtr依次访问StrBlob中的元素
+  for(int i=0; i<b1.size(); ++i){
+      cout<<p1.deref()<<endl;
+      p1=p1.incr();
+  }
+  ```
 
 
 
