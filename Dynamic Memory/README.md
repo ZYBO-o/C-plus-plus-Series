@@ -225,7 +225,7 @@ int main(){
 - bad_alloc和nothrow都定义在头文件`new`中
 
   ```c++
-  nt *p1=new int;            //若分配失败则抛出bad_alloc异常
+  int *p1=new int;            //若分配失败则抛出bad_alloc异常
   int *p2=new(nothrow) int;   //若分配失败则返回空指针
   ```
 
@@ -279,16 +279,68 @@ int main(){
 + 12.6
 
   ```c++
+  vector<int>* Create(){	return new (nothrow) vector<int>; }
   
+  vector<int>* Read(vector<int> *p)
+  {
+      string filename = "Test.txt";
+      ifstream infile(filename);
+      int num = 1;
+      if(num)
+      {
+          while (infile >> num)
+              p->push_back(num);
+      }
+      return p;
+  }
+  
+  void Printf(vector<int>* p)
+  {
+      for (auto i = p->begin(); i < p->end(); ++i) {
+          cout << *i << endl;
+      }
+  }
+  
+  int main(){
+      vector<int> *p = Create();
+      Printf(Read(p));
+  }
   ```
+
+
 
 + 12.7
 
   ```c++
+  shared_ptr<vector<int>> Create(){	return make_shared<vector<int>>(); }
   
+  shared_ptr<vector<int>> Read(shared_ptr<vector<int>> &p)
+  {
+      string filename = "Test.txt";
+      ifstream infile(filename);
+      int num = 1;
+      if(num)
+      {
+          while (infile >> num)
+              p->push_back(num);
+      }
+      return p;
+  }
+  
+  void Printf(shared_ptr<vector<int>> p)
+  {
+      for (auto i = p->begin(); i < p->end(); ++i) {
+          cout << *i << endl;
+      }
+  }
+  
+  int main(){
+      shared_ptr<vector<int>> p = Create();
+      Printf(Read(p));
+  }
   ```
 
-
+  
 
 ### 3.shared_pyt与new结合使用
 
@@ -430,22 +482,6 @@ int main(){
   - 不使用get()初始化或reset另一个智能指针
   - 谨慎使用get()返回的指针，最后一个智能指针销毁后对象就被销毁了
   - **<font color = red>若使用智能指针管理的资源不是new分配的内存，要自定义delete</font>**
-
-#### 习题
-
-+ 12.14
-
-```c++
-
-```
-
-+ 12.15
-
-```c++
-
-```
-
-
 
 
 
@@ -732,7 +768,7 @@ int main(){
 
 - 若要使用shared_ptr管理动态数组，需提供`自定义delete`
 
-- shared_ptr未定义下标算符，且智能指针都不支持指针算数运算。故shared_ptr访问数组中元素时必须用get函数取出内置指针
+- shared_ptr未定义下标算符，且智能指针都不支持指针算数运算。故shared_ptr访问数组中元素时必须用get函数取出内置指针,不支持下标运算
 
 - 例子：shared_ptr管理动态数组
 
@@ -788,7 +824,7 @@ int main(){
   ```c++
   allocator<string> alloc;
   auto const p=alloc.allocate(n); //分配n个string的内存，返回首指针
-  auto q=p;                       //指向分配区域的起始
+  auto q=p;                       //指向分配区域的起始，q指向已构造空间的尾后
   alloc.construct(q++);           //构造空字符串，指针推进
   alloc.construct(q++,10,'c');    //构造字符串，指针推进
   alloc.construct(q++,"hi");      //构造字符串，指针推进
@@ -824,11 +860,127 @@ int main(){
 
 ## 三.使用标准库，文本查询程序
 
+- TextQuery类
 
+  ```c++
+  class QueryResult; //前向声明
+  class TextQuery{
+  public:
+      //定义行号类型
+      using line_no=std::vector<std::string>::size_type;
+      //根据文件流构造
+      TextQuery(std::ifstream &);
+      //根据给定的要查找字符串返回QueryResult对象
+      QueryResult query(const std::string &) const;
+  private:
+      //用shared_ptr管理底层文本数据
+      std::shared_ptr<std::vector<std::string>> file;
+      //用shared_ptr管理每个单词的行号集合，并将单词map到行号集合
+      std::map<std::string,std::shared_ptr<std::set<line_no>>> wm;
+  };
+  //构造函数，初值列表中分配动态内存来构造智能指针
+  TextQuery::TextQuery(std::ifstream &is):file(new std::vector<std::string>){
+      std::string text;
+      //取出一行
+      while(std::getline(is,text)){
+          //逐行放入底层vector中
+          file->push_back(text);
+          //n是这一行在vector中的索引
+          int n=file->size()-1;
+          std::istringstream line(text);
+          std::string word;
+          //用istringstream从一行中读取单词
+          while(line>>word){
+          	//若word不在map中则添加到map。使用引用是因为对应的集合会改变
+              auto &lines=wm[word];
+              if(!lines) //line是智能指针，若指针为空，则说明刚创建，需要new一个set
+                  lines.reset(new std::set<line_no>);
+              //将当前行号插入该单词对应的set
+              lines->insert(n);
+          }
+      }
+  }
+  ```
 
+- QueryResult类
 
+  ```c++
+  class QueryResult{
+  //通过友元函数实现接口
+  friend std::ostream &print(std::ostream &,const QueryResult &);
+  public:
+      using line_no=std::vector<std::string>::size_type;
+      //构造函数只用来初始化成员
+      QueryResult(std::string s,std::shared_ptr<std::set<line_no>> p,std::shared_ptr<std::vector<std::string>> f):
+                 sought(s),lines(p),file(f) {}、
+      //以下3个函数是15.9的面向对象例程需要用的
+      std::set<line_no>::iterator begin(){return lines->begin();}
+      std::set<line_no>::iterator end(){return lines->end();}
+      std::shared_ptr<std::vector<std::string>> get_file(){return file;}
+  private:
+      std::string sought;                             //要查找的单词
+      std::shared_ptr<std::set<line_no>> lines;       //shared_ptr指向行号set
+      std::shared_ptr<std::vector<std::string>> file; //shared_ptr指向文本vector
+  };
+  ```
 
+- query成员函数
 
+  ```c++
+  QueryResult TextQuery::query(const std::string &sought) const{
+      //未找到给定单词时返回的空集合。由于只需要一个这样的集合，声明为static避免每次未找到都分配空间
+      static std::shared_ptr<std::set<line_no>> nodata(new std::set<line_no>);
+      auto loc=wm.find(sought);
+      if(loc==wm.end())
+          //未找到时得到指向空集合的指针
+          return QueryResult(sought,nodata,file);
+      else
+          //找到时得到指向对应集合的指针
+          return QueryResult(sought,loc->second,file);
+  }
+  ```
 
+- 打印结果
 
+  ```c++
+  std::ostream &print(std::ostream &os,const QueryResult &qr){
+      os<<qr.sought<<" occurs "<<qr.lines->size()
+        <<((qr.lines->size()>1)?" times":" time")<<std::endl;
+      for(auto num:*qr.lines)
+          os<<"\t(line "<<num+1<<") "
+            <<*(qr.file->begin()+num)<<std::endl;
+      return os;
+  }
+  ```
 
+- 封装：将上述定义按顺序放入文件中，并将runQueries放在最后，并添加头文件和头文件保护，封装为hpp：
+
+  ```c++
+  //文件名：TextQuery.hpp
+  #ifndef __TEXTQUERY_HPP__
+  #define __TEXTQUERY_HPP__
+  #include<string>
+  #include<vector>
+  #include<set>
+  #include<map>
+  #include<memory>
+  #include<iostream>
+  #include<fstream>
+  #include<sstream>
+  /* 上面的一些定义和runQueries */
+  #endif
+  ```
+
+- 测试：建立cpp文件，包含上述头文件
+
+  ```c++
+  //文件名：TextQuery_test.cc
+  #include"./TextQuery.hpp"
+  int main(){
+      std::ifstream in("文件名");
+      runQueries(in);
+      return 0;
+  }
+  ```
+
+  
