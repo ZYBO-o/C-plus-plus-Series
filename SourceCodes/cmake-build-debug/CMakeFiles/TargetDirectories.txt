@@ -1,0 +1,3 @@
+/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/SourceCodes/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/SourceCodes/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/SourceCodes/cmake-build-debug/CMakeFiles/SourceCodes.dir
