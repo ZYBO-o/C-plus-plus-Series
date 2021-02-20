@@ -153,16 +153,7 @@ void StrBlob::pop_back(){
     check(0,"pop_back on empty StrBlob");
     data->pop_back();
 }
-
-int main(){
-
-    /* 使用StrBlob */
-    StrBlob b1;                         //创建新StrBlob
-    {                                   //进入新作用域
-        StrBlob b2={"a","an","the"};    //初始化b2
-        b1=b2;                          //用b2初始化b1，它们共享底层数据
-    }                                   //离开作用域，b2被释放，b1仍存在，共享的底层数据未丢失
-
+                         
 int main(){
 
     /* 使用StrBlob */
@@ -176,7 +167,6 @@ int main(){
         b1.pop_back();
     }
 }
-
 ```
 
 - 对类对象使用默认版本的拷贝/赋值/销毁操作时，这些操作拷贝/赋值/销毁类的数据成员（包括智能指针）。
@@ -205,7 +195,7 @@ int main(){
 - 例子：动态对象初始化
 
   ```c++
-  /默认初始化
+  //默认初始化
   int *pi=new int;                            //未定义
   string *ps=new string;                      //默认初始化为空字符串
   //直接初始化
