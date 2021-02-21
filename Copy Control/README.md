@@ -12,7 +12,7 @@
 
 - `拷贝构造函数`：这种构造函数的第一个参数是`自身类类型的引用`，且任何额外参数都有默认值。
 
-- 拷贝构造函数的第一个参数必须是引用类型（否则传参时需要拷贝，循环调用）。虽然也可定义为非const，但几乎总是用`const引用`（不会改变被拷贝对象，且const引用能接受更多类型的参数）。
+- 拷贝构造函数的第一个参数 **必须** 是引用类型（否则传参时需要拷贝，循环调用）。虽然也可定义为非const，但几乎总是用`const引用`（不会改变被拷贝对象，且const引用能接受更多类型的参数）。
 
   ```c++
   class Foo{
@@ -23,9 +23,9 @@
   }
   ```
 
-- **拷贝构造函数经常会被隐式使用（例如函数的传参和返回值），故不应该是`explicit`**
+- 拷贝构造函数经常会被 **隐式使用（例如函数的传参和返回值）** ，故**不应该是`explicit`**
 
-- 若未自定义拷贝构造函数，即使定义了其他构造函数， **<font color = red>编译器也会合成一个拷贝构造函数（这一点与默认构造函数不同）</font>**
+- 若未自定义拷贝构造函数， **<font color = red>即使定义了其他构造函数，编译器也会合成一个拷贝构造函数（这一点与默认构造函数不同）</font>**
 
 - `合成的拷贝构造函数`若非删除，则会将其参数的非static成员逐个拷贝到正在构造的对象中：
 
@@ -51,6 +51,36 @@
                         units_sold(orig.units_sold),
                         revenue(orig.revenue)
                         {}
+  ```
+
+  ```c++
+  //没有写拷贝构造函数，但是编译器使用了合成拷贝构造函数
+  class Sales_data {
+  public:
+      Sales_data();
+      Sales_data(string s,int Units_sold,double Revenue)
+      {
+          bookNo = s;
+          units_sold =Units_sold;
+          revenue = Revenue;
+      }
+      void Print()
+      {
+          cout << bookNo << endl;
+          cout << units_sold << endl;
+          cout << revenue << endl;
+      }
+  private:
+      std::string bookNo;
+      int units_sold = 0;
+      double revenue = 0.0;
+  };
+  
+  int main(){
+      Sales_data sa("heoo",1,1);
+      Sales_data b(sa);//编译器使用了合成拷贝构造函数
+      b.Print();
+  }
   ```
 
 - 直接初始化和拷贝初始化的差别：
@@ -111,7 +141,7 @@
 
 - 类可通过拷贝构造函数来控制初始化，也可通过`拷贝赋值算符`来控制对象赋值
 
-- `重载算符`本质上是函数，其名字是`operator`关键字后接要定义的算符的符号。
+- `重载算符`本质上是函数，其名字是`operator`关键字后接要定义的算符的符号。为了与内置类型的赋值保持一致，赋值运算符通常返回一个指向起左侧运算对象的引用。
 
 - 赋值算符是名为`operator=`的函数，它也有返回类型和参数列表
 
@@ -146,7 +176,37 @@
   }
   ```
 
+  ```c++
+  ////没有写拷贝赋值函数，但是编译器使用了合成拷贝赋值函数
+  class Sales_data {
+  public:
+      Sales_data();
+      Sales_data(string s,int Units_sold,double Revenue)
+      {
+          bookNo = s;
+          units_sold =Units_sold;
+          revenue = Revenue;
+      }
+      void Print()
+      {
+          cout << bookNo << endl;
+          cout << units_sold << endl;
+          cout << revenue << endl;
+      }
+  private:
+      std::string bookNo;
+      int units_sold = 0;
+      double revenue = 0.0;
+  };
+  
+  int main(){
+      Sales_data sa("heoo",1,1);
+      Sales_data b = sa;//合成拷贝赋值运算符
+      b.Print();
+  }
+  ```
 
+  
 
 ### 3.析构函数
 
@@ -157,7 +217,7 @@
 - 构造函数和析构函数的共性和差异：
 
   - 构造函数有一个显式的初值列表和一个函数体；析构函数有一个函数体和一个隐式的析构部分。
-  - 构造函数先做成员初始化再执行函数体，成员按照类中出现的顺序初始化；析构函数先执行函数体再销毁成员，成员按照初始化的逆序销毁。
+  - **<font color = red>构造函数先做成员初始化再执行函数体，成员按照类中出现的顺序初始化；析构函数先执行函数体再销毁成员，成员按照初始化的逆序销毁。</font>**
 
 - 析构函数的析构部分是隐式的，成员如何销毁完全取决于类型：类类型成员析构时调用析构函数，内置成员析构时什么都不做，特别是，析构内置指针成员不会delete它指向的对象。
 
@@ -194,6 +254,10 @@
 
 
 ### 4.三/五法则
+
+> 由于拷贝控制操作是由三个特殊的成员函数来完成的，所以我们称此为“C++三法则”。在较新的 C++11 标准中，为了支持移动语义，又增加了移动构造函数和移动赋值运算符，这样共有五个特殊的成员函数，所以又称为“C++五法则”。
+>
+> 也就是说，“三法则”是针对较旧的 C++89 标准说的，“五法则”是针对较新的 C++11 标准说的。为了统一称呼，后来人们把它叫做“C++ 三/五法则”。
 
 - 三个基本操作可控制类的拷贝：`拷贝构造函数`、`拷贝赋值算符`、`析构函数`。C++11中还定义了`移动构造函数`和`移动赋值算符`
 
@@ -268,6 +332,8 @@ int main(){
 
 ### 5.使用=default
 
+> 有时候当我们仅创建了有参构造函数后，如果你想调用无参构造函数编译是会报错的。因为一旦你自己定义了构造函数，系统的默认构造函数是被屏蔽的，也就是说此时是没有无参构造函数的，所以我们需要自己定义一个无参构造函数。**但是现在在C++11中，如果我们仅定义了有参构造函数，可以通过default关键字让默认构造函数恢复。**
+
 - 将拷贝控制成员定义为`=default`可显式要求编译器生成合成的版本。只能对具有合成版本的成员函数使用（构造函数和拷贝控制成员）
 
 - 例子：使用=default
@@ -318,7 +384,7 @@ int main(){
   delete p;               //错，析构函数是删除的
   ```
 
-对某些类的某些拷贝控制成员，编译器将合成的成员定义为删除函数**。本质上，这些规则的含义是：若类有数据成员不可默认构造、拷贝、赋值、销毁，则该类对应的成员函数被定义为删除：**
+对某些类的某些拷贝控制成员，编译器将合成的成员定义为删除函数**。本质上，这些规则的含义是：<font color = red>若类有数据成员不可默认构造、拷贝、赋值、销毁，则该类对应的成员函数被定义为删除。</font>**
 
 - 删除合成析构函数：
   - 类某成员的析构函数是删除的或不可访问
@@ -357,7 +423,45 @@ int main(){
 + 13.18
 
   ```c++
+  class Employee
+  {
+  private:
+      static int number;
+  public:
+      Employee(){number++}
+      Employee(string s = string()) : name(s), num(number++) {}
+      Employee(const Employee & e)
+      {
+          name = e.name;
+          num = number++;
+      }
+      Employee&operator = (const Employee & e)
+      {
+          string newps = string(e.name);
+          name = newps;
+          num = number++;
+          return *this;
+      }
+      int GetNum(){return num;}
+  private:
+      string name;
+      int num;
+  };
   
+  int Employee::number = 0;
+  
+  int main()
+  {
+      Employee e1("Ok");
+      cout << e1.GetNum() << endl;
+      Employee e2("hello");
+      cout << e2.GetNum() << endl;
+      Employee e3(e1);
+      cout << e3.GetNum() << endl;
+      Employee e4 = e1;
+      cout << e4.GetNum() << endl;
+  
+  }
   ```
 
   
