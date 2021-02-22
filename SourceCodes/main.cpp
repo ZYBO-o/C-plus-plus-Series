@@ -215,8 +215,13 @@ void swap(Folder &f1, Folder &f2)
 
 int main()
 {
-    Message m;
-    
+    Message *m = new Message("OK");
+    print(*m);
+    Message n("hello");
+    print(n);
+    Folder f;
+    f.addMsg(m);
+
     return 0;
 }
 
