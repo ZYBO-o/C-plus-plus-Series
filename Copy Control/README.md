@@ -1196,3 +1196,120 @@ Message &Message::operator=(Message &&rhs){
 
 ### 3.右值引用与成员函数
 
+- 除拷贝控制成员外，普通成员同时提供拷贝和移动版本也可得到优化。方法是提供两个版本的重载：拷贝版本接受指向`const的左值引用`，移动版本接受指向`非const的右值引用`
+
+- 例子：定义了push_back的容器有拷贝和移动两个版本
+
+  ```c++
+  void push_back(cons T&);    //拷贝版本，绑定到任意能转换为T的对象（临时量）
+  void push_back(T &&);       //移动版本，只能绑定到类型T的可修改的右值
+  ```
+
+- 定义拷贝和移动版本时，不需要为函数操作定义接受`const T &&`或是`T &`的版本。因为移动应改变对象，不能const；拷贝不应改变对象，应该const
+
+- 例子：为13.5的StrVec定义拷贝和移动版本的push_back
+
+  ```c++
+  class StrVec{
+  public:
+      void push_back(const string &); //拷贝版本
+      void push_back(string &&);      //移动版本
+      /* 其他成员 */
+  };
+  //拷贝版本
+  void StrVec::push_back(const string &s){
+      chk_n_alloc();
+      alloc.construct(first_free++,s);            //拷贝构造
+  }
+  //移动版本
+  void StrVec::push_back(string &&){
+      chk_n_alloc();
+      alloc.construct(first_free++,std::move(s)); //移动构造
+  }
+  //使用push_back，实参类型决定拷贝还是移动
+  StrVec vec;
+  string s="some string or another";
+  vec.push_back(s);       //传入左值，调用拷贝版本
+  vec.push_back("done");  //传入右值，调用移动版本
+  ```
+
+#### 右值和左值引用成员函数
+
+- 允许在右值对象上调用成员
+
+- 允许向右值赋值（为维持后向兼容）
+
+- 例子：在右值对象上调用成员，向右值赋值
+
+  ```c++
+  string s1="a value",s2="another";
+  auto n=(s1+s2).find('a');   //在右值对象上调用成员
+  s1+s2="wow!";               //向右值赋值
+  ```
+
+- C++11允许使用`引用限定符`来强制算符的左侧运算对象（即this对象）是左值或右值。
+
+- 引用限定符置于参数列表后，可以是`&`/`&&`，分别指出this应指向左值/右值
+
+- 引用限定符只能用于非static成员函数，且必须同时出现在声明和定义中
+
+- 例子：引用限定符
+
+  ```c++
+  class Foo{
+  public:
+      Foo &operator=(const Foo &) &; //有&无const，只能向可修改的左值赋值
+      /* 其他成员 */
+  };
+  Foo &Foo::operator=(const Foo &rhs) &{
+      /* 执行操作 */
+      return *this;
+  }
+  //使用Foo
+  Foo &retFoo();  //返回引用，调用结果是左值
+  Foo retVal();   //返回值，调用结果是右值
+  Foo i,j;        //i和j都是左值
+  i=j;            //对，i是左值，该operator=可向左值赋值
+  retFoo()=j;     //对，retFoo()返回左值，该operator=可向左值赋值
+  retVal()=j;     //错，retVal()返回右值，该operator=不可向右值赋值
+  i=retVal();     //对
+  ```
+
+  > 函数可同时使用const和引用限定符，此时限定符必须在const之后
+
+#### 重载和引用函数
+
+- 可使用引用限定符来区分重载版本，且可综合const和引用限定符来区分重载版本
+
+- 例子：用const和引用限定符来区分重载版本
+
+  ```c++
+  cclass Foo{
+  public:
+      Foo sorted() &&;        //对右值对象调用，会改变调用对象
+      Foo sorted() const &;   //对左值对象调用，不会改变调用对象
+  private:
+      vector<int> data;
+  };
+  //原址排序
+  Foo Foo::sorted() &&{
+      sort(data.begin(),data.end());          //直接在右值对象上排序
+      return *this;                           //返回排序后的对象
+  }
+  //非原址排序
+  Foo Foo::sorted() const &{
+      Foo ret(*this);                         //先拷贝一个副本
+      sort(ret.data.begin(),ret.data.end());  //在拷贝的副本上排序
+      return ret;                             //返回拷贝的副本
+  }
+  //使用sort
+  Foo &retFoo();      //返回引用，调用结果是左值
+  Foo retVal();       //返回值，调用结果是右值
+  retFoo().sorted();  //对左值调用，非原址排序
+  retVal().sorted();  //对右值调用，原址排序
+  ```
+
+- 用const重载（形参相同的）成员函数时，可定义有const和无const两个版本
+
+- 用引用限定符重载（形参相同的）成员函数时，必须对所有版本都使用不同限定符（不能一个用而另一个不用）
+
