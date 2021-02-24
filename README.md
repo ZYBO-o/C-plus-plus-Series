@@ -227,7 +227,23 @@
 
 ## 九.拷贝控制
 
-+ 
++ [一、拷贝，赋值与销毁](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#%E4%B8%80%E6%8B%B7%E8%B4%9D%E8%B5%8B%E5%80%BC%E4%B8%8E%E9%94%80%E6%AF%81)
+  + [拷贝构造函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#1%E6%8B%B7%E8%B4%9D%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0)
+  + [拷贝赋值运算符](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#2%E6%8B%B7%E8%B4%9D%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6)
+  + [析构函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#3%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0)
+  + [三五法则](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#4%E4%B8%89%E4%BA%94%E6%B3%95%E5%88%99)
+  + [使用default](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#5%E4%BD%BF%E7%94%A8default)
+  + [阻止拷贝](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#6%E9%98%BB%E6%AD%A2%E6%8B%B7%E8%B4%9D)
++ [二、拷贝控制和资源管理](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#%E4%BA%8C%E6%8B%B7%E8%B4%9D%E6%8E%A7%E5%88%B6%E5%92%8C%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86)
+  + [行为像值的类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#1%E8%A1%8C%E4%B8%BA%E5%83%8F%E5%80%BC%E7%9A%84%E7%B1%BB)
+  + [定义行为像指针的类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#2%E5%AE%9A%E4%B9%89%E8%A1%8C%E4%B8%BA%E5%83%8F%E6%8C%87%E9%92%88%E7%9A%84%E7%B1%BB)
++ [三、交换操作](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#%E4%B8%89%E4%BA%A4%E6%8D%A2%E6%93%8D%E4%BD%9C)
++ [四、拷贝控制实例](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#%E5%9B%9B%E6%8B%B7%E8%B4%9D%E6%8E%A7%E5%88%B6%E5%AE%9E%E4%BE%8B)
++ [五、动态内存管理类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#%E4%BA%94%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%B1%BB)
++ [六、对象移动](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#%E5%85%AD%E5%AF%B9%E8%B1%A1%E7%A7%BB%E5%8A%A8)
+  + [右值引用](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#1%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8)
+  + [移动构造函数与移动赋值运算符](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#2%E7%A7%BB%E5%8A%A8%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%8E%E7%A7%BB%E5%8A%A8%E8%B5%8B%E5%80%BC%E8%BF%90%E7%AE%97%E7%AC%A6)
+  + [右值引用与成员函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Copy%20Control#3%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8%E4%B8%8E%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0)
 
 ## 十.重载运算与类型转换
 
