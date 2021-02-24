@@ -380,3 +380,437 @@
 
   
 
+## 八.函数调用运算符
+
+- 若类重载了函数调用算符，则可以像使用函数一样使用类的对象，它比普通函数更灵活
+
+- 函数调用算符必须是`成员函数`。一个类可定义多个调用算符，相互之间应在参数数量/类型上区分
+
+- 若类定义了调用算符，则称该类对象为`函数对象`
+
+- 函数对象经常用作标准库算法的实参（类似lambda）
+
+- 例子：定义调用算符
+
+  ```c++
+  class PrintString{
+  public:
+      //构造函数，指明打印对象和打印分隔符
+      PrintString(ostream &o=cout,char c=' '):
+                 os(o),sep(c)
+                 {}
+      //调用算符，进行实际的打印操作
+      void operator()(cosnt string &s) const {os<<s<<sep;}
+  private:
+      ostream &os;
+      char sep;
+  };
+  //使用函数对象
+  PrintString printer;            //定义默认的函数对象
+  printer(s);                     //调用函数对象
+  PrintString errors(cerr,'\n');  //定义函数对象
+  errors(s);                      //调用函数对象
+  ```
+
+### 1.lambda是函数对象
+
+- 编写lambda后，编译器将lambda翻译为一个匿名类的匿名对象。
+
+- lambda产生的匿名类中含有一个重载的函数调用算符，且形参列表和lambda的形参列表一样
+
+- 默认lambda不可改变捕获的变量，故其中重载的调用算符是const函数。除非将lambda声明为`mutable`
+
+- 例子：lambda产生匿名类
+
+  ```c++
+  //法1：用lambda实现谓词
+  stable_sort(words.begin(),words.end(),
+              [](const string &a,const string &b){return a.size()<b.size();});
+  //法2：用等价的函数对象实现谓词
+  class ShorterString{
+  public:
+      //调用算符的返回值、形参列表、函数体都与lambda一致
+      bool operator()(const string &a,const string &b) const {return a.size()<b.size();}
+  };
+  stable_sort(words.begin(),words.end(),ShorterString())
+  ```
+
+- 两种捕获:
+
+  - `引用捕获`：编译器直接使用，不需存储数据成员。程序负责保证引用的对象存在
+  - `值捕获`：对象被拷贝到lambda中，在生成的函数对象中为值捕获的变量建立成员，同时创建构造函数用初值列表初始化它们
+
+- lambda产生的类不含默认构造函数、赋值算符、默认析构函数，它是否含有默认拷贝/移动构造函数通常取决于捕获的数据成员
+
+- 例子：值捕获的lambda
+
+  ```c++
+  //值捕获的lambda
+  auto wc=find_if(words.begin(),words.end(),
+                  [sz](const string &a){return a.size()>=sz;});
+  class SizeComp{
+  public:
+      //构造函数用于初始化变量
+      SizeComp(size_t n):sz(n){}
+      //调用算符
+      bool operator()(const string &a) const {return a.size()>=sz;}
+  private:
+      //为捕获的值生成数据成员
+      size_t sz;
+  };
+  //使用时用值捕获的变量初始化函数对象
+  auto wc=find_if(words.begin(),words.end(),SizeComp(sz));
+  ```
+
+  
+
+### 2.标准库定义的函数对象
+
+- 标准库定义了一组表示算术、关系、逻辑算符的类，每个类分别定义了一个执行命名操作的调用算符
+
+- 这些类都是模板，可为其指定应用的类型，即调用该算符的形参类型
+
+- 例子：使用标准库定义的函数对象
+
+  ```c++
+  plus<int> intAdd;               //int的加法
+  negate<int> intNegate;          //int的取反
+  int sum=intAdd(10,20);          //结果是30
+  sum=intNegate(intAdd(10,20));   //结果是-30
+  sum=intAdd(10,intNegate(10));   //结果是0
+  ```
+
+- 标准库定义的这组函数对象定义于`functional`头文件，见表14.2：
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/61.png"  width="600"/> 
+  </div>
+
+- 表示算符的函数对象类常用于替换标准库算法中的默认算符（类似lambda）
+
+- 直接用算符比较指针是未定义，但可用标准库的函数对象来比较指针
+
+- 例子：可用标准库函数对象比较指针
+
+  ```c++
+  vector<string *> nameTable;
+  //用内置的<对string指针排序，未定义
+  sort(nameTable.begin(),nameTable.end(),
+       [](string *a,string *b){return a<b;});
+  //用标准库定义的函数对象对string指针排序，正确
+  sort(nameTable.begin(),nameTable.end(),less<string *>());
+  ```
+
+
+
+### 3.可调用对象与function
+
+- C++中`可调用对象`的种类：`函数`、`函数指针`、`lambda表达式`、`bind创建的对象`、`重载了函数调用算符的类`
+
+- `调用形式`指明了调用返回的类型以及传递给调用的参数类型，一种调用形式对应一个函数类型。不同类型的可调用对象可共享同一种调用形式
+
+- 例子：不同类型的可调用对象共享调用形式
+
+  ```c++
+  /以下3个可调用对象的调用形式都是int(int,int)
+  //函数
+  int add(int i,int j){return i+j;}
+  //lambda
+  auto mod=[](int i,int j){return i%j;}
+  //重载了调用算符的类
+  struct divide{
+      int operator()(int denominator,int divisor){return denominator/divisor;}
+  };
+  ```
+
+- 有时候希望将共享调用形式的可调用对象看成同一种类型的对象。例如定义`函数表`用于存储指向一些可调用对象的指针，程序需要某个可调用对象时从表中查找该对象
+
+- 函数表可用map实现，key是string，value是可调用对象的指针。但这些指针类型各不相同，无法确定map的类型
+
+- 使用名为`function`的标准库类型可将调用形式相同的不同类型可调用对象统一表示，它定义于functional头文件，操作见表14.3
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/62.png"  width="600"/> 
+  </div>
+
+- function是模板类，其模板参数是它能表示的调用形式（对应的函数类型）
+
+- 可将不同类型的可调用对象存入同类型的function中，只要它们调用形式相同
+
+- function类型重载了调用算符，该算符将其接受的实参传递给底层的可调用对象
+
+- 例子：不同类型的可调用对象存入同类型的function
+
+  ```c++
+  /* 上下文：上一个例子 */
+  function<int(int,int)> f1=add;                          //加法，函数
+  function<int(int,int)> f2=divide();                     //除法，重载调用算符的类
+  function<int(int,int)> f3=[](int i,int j){return i*j};  //乘法，lambda实现
+  cout<<f1(4,2)<<endl;    //6
+  cout<<f2(4,2)<<endl;    //2
+  cout<<f3(4,2)<<endl;    //8
+  ```
+
+- 例子：用function类定义函数表
+
+  ```c++
+  //定义函数表，用于查找操作并调用。统一类型为function<int(int,int)>
+  map<string,function<int(int,int)>> binops={
+      {"+",add},                          //上文定义的函数
+      {"-",minus<int>()},                 //标准库的函数对象
+      {"/",divide()},                     //上文定义的重载调用算符的类
+      {"*",[](int i,int j){return i*j;}}, //lambda
+      {"%",mod},                          //上文定义的lambda
+  };
+  //使用函数表
+  binops["+"](10,5);  //调用add(10,5)
+  binops["-"](10,5);  //使用minus<int>对象的调用算符
+  binops["/"](10,5);  //使用divide对象的调用算符
+  binops["*"](10,5);  //使用lambda对象
+  binops["%"](10,5);  //使用lambda对象
+  ```
+
+- 若存在重载函数，则function不能识别是哪一个，即使存在调用形式相同的函数也不行。但定义函数指针时可识别是哪个函数，也可在lambda中调用函数来区分
+
+- 例子：function不能识别重载函数
+
+  ```c++
+  int add(int i,int j){return i+j;}
+  Sales_data add(const Sales_data &,const Sales_data &);
+  map<string,function<int(int,int)>> binops;
+  binops.insert({"+",add});                               //错，function不能识别是哪个重载函数
+  int (*fp)(int,int)=add;                                 //对，函数指针能识别是哪一个重载函数
+  binops.insert({"+",fp});
+  binops.insert({"+",[](int a,int b){return add(a,b);}}); //对，直接调用也能识别是哪一个重载函数
+  ```
+
+- C++11的`function`和旧版本的`unary_function`、`binary_function`并无关联，后两者已经被更通用的`bind`函数替代
+
+
+
+## 九.重载，类型转换与运算符
+
+用户定义的类型转换：
+
+- `转换构造函数`：由一个实参调用的非explicit构造函数定义类型转换，将实参类型转换为该类类型
+- `类型转换算符`：重载的算符，将该类类型转换为指定类型
+
+### 1.类型转换运算符
+
+- 类型转换算符是一种特殊的`成员函数`，负责将该类类型转换为其他类型。
+
+- 类型转换算符的定义形式为`operator type() const`，其中`type`表示要转换为的类型。
+
+- 类型转换算符可对除`void`外的任何类型定义，只要该类型可作为函数的返回类型（因为用return实现）。故不转换为数组或函数，但可转换为它们的指针/引用
+
+- 类型转换算符没有显式的返回类型，也没有形参，且必须定义为成员函数。通常不应该改变原对象的内容（拷贝而非移动），故经常定义为const
+
+- 编译器一次只能执行一个自定义的类型转换，但一个隐式的自定义类型转换可与一个隐式的内置类型转换一起使用。
+
+- 类型转换隐式执行，故类型转换算符都没有形参
+
+- 类型转换算符的返回类型不需要指定（蕴含在函数名中）
+
+- 例子：定义类型转换算符
+
+  ```c++
+  class SmallInt{
+  public:
+      //构造函数实现int向该类的转换
+      SmallInt(int i=0):val(i){
+          if(i<0 || i>255)
+              throw out_of_range("Bad SmallInt value");
+      }
+      //类型转换算符实现该类向int的转换
+      operator int() const {return val;}
+  private:
+      size_t val;
+  };
+  SmallInt si;
+  si=4;       //4隐式转换为SmallInt，调用合成的SmallInt::operator=
+  si+3;       //si隐式转换为int，调用int的加法（因为SmallInt未重载opeartor+）
+  //可同时使用一个隐式的自定义类型转换与一个隐式的内置类型转换
+  si=3.14;    //先内置转换把3.14转为int，再调用转换算符转为SmallInt
+  si+3.14;    //先调用转换算符把si转为int，再内置转换为double
+  ```
+
+- 若在类类型和要转换的类型之间没有明显的映射关系，最好不要定义转换算符
+
+- 实践中，类很少提供转换算符。隐式转换发生时用户可能感到意外而不是被帮助
+
+- 定义转为`bool`的转换算符比较普遍，经常用于条件判断场合
+
+- 为类定义转为bool的转换算符存在的问题是：bool可参与算术运算，可能引发意想不到的结果
+
+- 例子：定义转为bool的类参与算术运算（反例）
+
+  ```c++
+  /* 假设cin可以隐式转为bool */
+  int i=42;
+  cin<<i;
+  //cin未定义<<操作，但可转为bool
+  //于是cin转为bool，无效为0，有效为1。<<成为左移操作，将cin提升为int
+  //结果是将0或1左移42bit
+  ```
+
+- 防止上述异常，C++11引入`显式类型转换算符`，即在类型转换算符前使用`explicit`关键字，只允许用强制转换方式实现类型转换
+
+- 若表达式用作条件，则编译器将显式的类型转换自动应用于该表达式（即忽略explicit）：
+
+  - if/while/do语句的条件部分
+  - for语句头的条件表达式
+  - 逻辑非`!`、逻辑与`&&`、逻辑或`||`的运算对象
+  - 条件算符`?:`的条件表达式
+
+- 实现转为bool但避免算术运算的方法：
+
+  - C++11中：将向bool转换的转换算符定义为`explicit`。变量单独放于条件中会自动忽略explicit
+  - 旧标准中：定义向`void *`而非bool的转换算符。void *也可用于判断，但不会参与算术运算
+
+- `operator bool`经常被定义为explicit的
+
+
+
+### 2. 避免有二义性的类型转换
+
+- 若类中包含一个或多个类型转换，则必须确保在该类类型和目标类型之间只存在唯一的转换方式，即无二义性
+
+- 两种情况下可能产生`二义性`：
+
+  - 两个类定义了作用相同的类型转换，例如：A定义了接受B类型的转换构造函数，同时B定义了向A转换的转换算符
+  - 类定义了多个转换算符，而这些转换目标的类型又能相互转换，例如：类定义了转换为int的算符，又定义了转换为short的算符，而实际需要一个double类型
+
+- 不要为多个类定义相同的类型转换，不要为类定义多个转换源或转换目标是算术类型的转换
+
+- 对于多个类定义相同类型转换的二义性，解决方式是显式调用函数。显式转换无法解决，因为显式转换也面临二义性
+
+- 例子：为多个类定义相同的类型转换（反例）
+
+  ```c++
+  struct B;
+  struct A{
+      A()=default;
+      A(const B &);       //B转为A
+  };
+  struct B{
+      operator A() const; //B转为A
+  };
+  //使用这两个类
+  A f(const A &);         //函数接受A的引用，传入B的对象时发生隐式转换
+  B b;
+  A a=f(b);               //二义性错误：B转为A时，可调用A的构造函数，也可调用B的转换算符
+  //解决方案：显式调用
+  A a1=f(b.operator A()); //对，显式调用B的转换算符
+  A a2=f(A(b));           //对，显式调用A的构造函数
+  ```
+
+- 对于类定义了多个转换算符，而这些转换目标的类型又能相互转换的情形，二义性的根本原因是它们所需的内置转换级别一致
+
+- 使用自定义的转换算符时，若转换过程包含内置转换，则内置转换的级别决定选择哪个转换算符作为最佳匹配
+
+- 例子：内置转换的级别决定选择哪个转换算符
+
+  ```c++
+  struct A{
+      A(int=0);                   //int转为A
+      A(double);                  //double转为A
+      operator int() const;       //A转为int
+      operator double() const;    //A转为double
+  };
+  //使用A
+  void f2(long double);
+  A a;
+  f2(a);      //二义性，f2接受long double，存在两条转换路径：A->int->long double，A->double->long double
+  long lg;
+  A a2(lg);   //二义性，转换为A类型时有两条转换路径：long->int->A，long->double->A
+  short s=42;
+  A a3(s);    //无二义性，"short->int"优于"short->double"，故选择转换路径：short->int->A
+  ```
+
+- 设计类的重载算符、转换构造函数、类型转换函数时，必须小心。类同时定义了类型转换算符和重载算符时很容易二义性。
+
+  - 不要让两个类实现相同的类型转换
+  - 避免转换目标是内置算术类型的转换算符
+    - 定义了转为算术类型的算符时，不要再定义接受算术类型的重载算符
+    - 定义了转为算术类型的算符时，不要定义转换到多种算术类型的转换算符
+  - 除了explicit地转换为bool的算符外，应尽量避免定义类型转换算符，并尽可能限制那些“显然正确”的非explicit构造函数
+
+- 调用`重载函数`时，从多个类型转换中进行选择将更加复杂。若两个或多个类型转换都提供了同一种可行的匹配，则这些转换一样好
+
+- 调用者可显式构造正确的类型消除二义性
+
+- 若在调用重载函数时，需要使用`显式构造函数`或`强制类型转换`来改变实参类型，通常意味着程序设计存在不足
+
+- 例子：从多个类型转换中选择重载函数
+
+  ```c++
+  struct C{
+      C(int);     //int转为C
+  };
+  struct D{
+      D(int);     //int转为D
+  };
+  void manip(const C &);
+  void manip(const D &);
+  manip(10);      //二义性错误，manip(C(10))或manip(D(10))
+  manip(C(10));   //正确，显式调用
+  ```
+
+- 调用重载函数时，若两个或多个自定义类型转换都提供了可行匹配，则它们提供的转换一样好。此时不考虑任何内置类型转换的级别。
+
+- 只有所有可行函数能通过同一个自定义类型转换得到匹配时，才会考虑其中出现的内置类型转换
+
+- 若调用重载函数所请求的自定义类型转换不止一个，即使其中一个需要额外的内置类型转换而另一个精确匹配，它们也是二义性的。（本质原因是，对于自定义类型转换之间的差异而言，内置类型转换的差异可以忽略）
+
+- 例子：调用重载函数所请求的自定义类型转换不止一个时一定是二义性
+
+  ```c++
+  struct C{
+      C(int);     //int转为C
+  };
+  struct E{
+      E(double);     //int转为E
+  };
+  void manip2(const C &);
+  void manip2(const E &);
+  manip2(10); //二义性，可匹配到两个类型转换：int->C和int->double->E
+              //但由于是重载函数且是不同的自定义转换，故它们一样好
+  ```
+
+
+
+### 3.函数匹配与重载运算符
+
+- 重载的算符也是重载的函数，故通用的函数匹配规则也适用于判断表达式中使用哪个算符。
+
+- 算符出现在表达式中时，候选函数集会比较大，例如`a sym b`可能是：
+
+  - 内置算符`sym`
+  - 重载的非成员函数，即`operatorsym(b)`
+  - 重载的a的成员函数，即`a.operatorsym(b)`（当a出现在左侧时才有可能）
+
+- 显式调用一个命名的函数时，具有该名字的成员函数和非成员函数不会彼此重载，因为会用`.`或`->`来显式说明是成员。但算符无法被这样区分。
+
+- 若对同一个类，既提供了转换源和转换目标是算术类型的转换，又提供了重载的算符，则会遇到`重载算符`与`内置算符`的二义性问题
+
+- 例子：重载算符和内置算符的二义性（反例）
+
+  ```c++
+  class SmallInt{
+      //对SmallInt重载+
+      friend SmallInt operator+(const SmallInt &,const SmallInt &);
+  public:
+      SmallInt(int=0);                    //int转为SmallInt
+      operator int() const {return val;}  //SmallInt转为int
+  private:
+      size_t val;
+  };
+  SmallInt s1,s2;
+  SmallInt s3=s1+s2;  //两侧都是SmallInt，使用重载的operator+
+  int i=s3+0;         //一侧SmallInt，另一侧int
+                      //但既可由int转为SmallInt，又可由SmallInt转为int
+                      //且存在int的+和SmallInt的operator+
+                      //故无法选择，二义性错误
+  ```
+
+  
