@@ -213,7 +213,17 @@
 
 ## 八.动态内存
 
-+ 
++ [一、动态内存与智能指针](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#%E4%B8%80%E5%8A%A8%E6%80%81%E5%86%85%E5%AD%98%E5%92%8C%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88)
+  + [1、share_ptr类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#1shared_ptr%E7%B1%BB)
+  + [2、直接管理内存](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#2%E7%9B%B4%E6%8E%A5%E7%AE%A1%E7%90%86%E5%86%85%E5%AD%98)
+  + [3、share_pyt与new结合使用](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#3shared_pyt%E4%B8%8Enew%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8)
+  + [4、智能指针与异常](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#4%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B8%8E%E5%BC%82%E5%B8%B8)
+  + [5、unique_ptr](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#5unique_ptr)
+  + [6、weak_ptr](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#6weak_ptr)
++ [二、动态数组](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#%E4%BA%8C%E5%8A%A8%E6%80%81%E6%95%B0%E7%BB%84)
+  + [1、new和数组](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#1new%E5%92%8C%E6%95%B0%E7%BB%84)
+  + [2、allocator类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#2allocator%E7%B1%BB)
++ [三、使用标准库，文本查询程序](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Dynamic%20Memory#%E4%B8%89%E4%BD%BF%E7%94%A8%E6%A0%87%E5%87%86%E5%BA%93%E6%96%87%E6%9C%AC%E6%9F%A5%E8%AF%A2%E7%A8%8B%E5%BA%8F)
 
 ## 九.拷贝控制
 
