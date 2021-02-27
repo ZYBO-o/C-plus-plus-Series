@@ -938,3 +938,118 @@
   - 派生类可继承一部分构造函数，而为其他构造函数定义自己的版本。若自定义的版本与基类版本形参列表相同，则这个构造函数不会被继承
   - 默认/拷贝/移动构造函数不能被继承，它们按照正常规则合成。若一个类只有继承的构造函数，则他也将有一个合成的默认构造函数
 
+
+
+## 八.容器与继承
+
+- 使用容器存储继承体系的对象时，由于容器不可保存不同类型的元素，故不可直接存储具有继承关系的多种对象
+
+- 当派生类对象被赋值给基类对象时，派生类部分被“切掉”，只保留基类部分。因此若把派生类对象保存在基类类型的容器中，它们就不再是派生类对象了
+
+- 例子：派生类对象被放在基类容器中，被切掉
+
+  ```c++
+  * 上下文：Bulk_quote由Quote继承而来，net_price是虚函数，在基类和派生类中实现不一样 */
+  //容器中存放基类对象
+  vector<Quote> basket;
+  //基类对象存在基类容器中
+  basket.push_back(Quote("0-201-82470-1",50));
+  //派生类对象存在基类容器中，被切掉
+  basket.push_back(Bulk_quote("0-201-82470-1",50,10,0.25));
+  //调用原派生类对象的函数，但由于被切掉，实际调用的是基类部分的版本
+  cout<<basket.back().net_price(15)<<endl;
+  ```
+
+- 希望在容器中存放具有继承关系的对象时，实际存放的通常是基类的指针/智能指针。指针所指的动态类型可以是基类/派生类
+
+- 可将派生类的内置指针/智能指针转换为基类的内置指针/智能指针
+
+- 例子：在容器中保存基类指针
+
+  ```c++
+  /* 上下文：Bulk_quote由Quote继承而来，net_price是虚函数，在基类和派生类中实现不一样 */
+  //容器中存放指向基类的智能指针
+  vector<shared_ptr<Quote>> basket;
+  //存放指向基类对象的指针
+  basket.push_back(make_shared<Quote>("0-201-82470-1",50));
+  //存放指向派生类对象的指针
+  basket.push_back(make_shared<Bulk_quote>("0-201-82470-1",50,10,0.25));
+  //调用派生类版本的虚函数，动态绑定
+  cout<<basket.back()->net_price(15)<<endl;
+  ```
+
+  
+
+### 1.编写Basket类
+
+- C++做OOP的一个悖论是，无法直接使用对象进行面向对象编程，而是必须使用指针/引用
+
+- 大量使用指针会增加程序的复杂性，故经常定义一些辅助类（`句柄类`）来处理需要大量指针操作的情况
+
+- `new`语句不能处理多态，需要多态时应将new封装进虚函数中
+
+- 例子：使用句柄类管理指针
+
+  ```c++
+  /* 上下文：
+   * print_total定义于15.1
+   * Quote定义于15.2.1
+   * Bulk_quote定义于15.2.2
+   */
+  class Basket{
+  public:
+      //向底层指针的集合中添加一个指针
+      void add_item(const shared_ptr<Quote> &sale)
+                   {items.insert(sale);}
+      double total_receipt(ostream &) const;
+  private:
+      //自定义的序（谓词），定义为static是因为可以给所有对象共用
+      static bool compare(const shared_ptr<Quote> &lhs,const shared_ptr<Quote> &rhs)
+                         {return lhs->isbn()<rhs->isbn();}
+      //底层管理的是智能指针的集合，并自定义了序
+      multiset<shared_ptr<Quote>,decltype(compare) *> items{compare};
+  };
+  double Basket::total_receipt(ostream &os) const{
+      double sum=0.0;
+      //计算总价，iter解引用后是一个指向基类的指针
+      for(auto iter=items.cbegin();iter!=items.cend();iter=items.upper_bound(*iter))
+          sum+=print_total(os,**iter,items.count(*iter));
+      os<<"Total Sale: "<<sum<<endl;
+      return sum;
+  }
+  //如上所定义的句柄类添加元素时需要转为指针（如下），而不能直接使用对象，使用不便
+  Basket bsk;
+  bsk.add_item(make_shared<Quote>("123",45));
+  bsk.add_item(make_shared<Bulk_quote>("345",45,3,0.15));
+  //需要实现add_item的重载版本，使得可直接在句柄类中添加对象
+  void add_item(const Quote &sale);   //允许将对象拷贝给句柄类管理
+  void add_item(Quote &&sale);        //允许将对象移动给句柄类管理
+  
+  //需要在容器管理的类中添加拷贝和移动操作，允许将对象拷贝/移动给句柄类管理
+  class Quote{
+  public:
+      //定义为虚函数，则引用/指针调用clone时可正确选择拷贝/移动的版本，实现运行时多态
+      //返回指针，便于存入句柄类底层的容器中
+      virtual Quote *clone() cosnt & {return new Quote(*this);}
+      virtual Quote *clone() && {return new Quote(std::move(*this));}
+      /* 其他成员与15.2.1一样 */
+  };
+  class Bulk_quote: public Quote{
+  public:
+      Bulk_quote *clone() const & {return new Bulk_quote(*this);}
+      Bulk_quote *clone() && {return new Bulk_quote(std::move(*this));}
+      /* 其他成员与15.2.2一样 */
+  };
+  //向句柄类中添加add_item的重载操作，允许在接口中使用对象
+  class Basket{
+  public:
+      //传入的是引用，调用虚函数拷贝，可在运行时正确选择拷贝/移动的版本
+      void add_item(const Quote &sale)
+                   {items.insert(shared_ptr<Quote>(sale.clone()));}
+      void add_item(Quote &&sale)
+                   {items.insert(shared_ptr<Quote>(std::move(sale).clone()));}
+      /* 其他成员与上面的一样 */
+  };
+  ```
+
+  
