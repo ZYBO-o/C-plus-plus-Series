@@ -1053,3 +1053,359 @@
   ```
 
   
+
+## 九. 文本查询程序再探
+
+- 需求：查询文本中出现某单词的行数，并可使用与或非算符
+
+- 查询的文本：
+
+  ```c++
+  //文件名：OOP_TextQuery_test.txt
+  Alice Emma has long flowing red hair .
+  Her Daddy says when the wind blows
+  through her hair , it looks almost alive ,
+  like a fiery bird in flight .
+  A beautiful fiery bird , he tells her ,
+  magical but untamed.
+  " Daddy , shush , there is no such thing , "
+  she tells him , at the same time wanting
+  him to tell her more.
+  Shyly , she asks , " I mean , Daddy , is there ? "
+  ```
+
+- 测试样例1：单词查询 Daddy
+
+  ```C++
+  Executing Query for: Daddy
+  Daddy occurs 3 times
+      (line 2) Her Daddy says when the wind blows
+      (line 7) " Daddy , shush , there is no such thing , "
+      (line 10) Shyly , she asks , " I mean , Daddy , is there ? "
+  ```
+
+- 测试样例2：逻辑非查询 ~(Alice)
+
+  ```c++
+  Executing Query for: ~(Alice)
+  ~(Alice) occurs 9 times
+      (line 2) Her Daddy says when the wind blows
+      (line 3) through her hair , it looks almost alive ,
+      (line 4) like a fiery bird in flight .
+      (line 5) A beautiful fiery bird , he tells her ,
+      (line 6) magical but untamed.
+      (line 7) " Daddy , shush , there is no such thing , "
+      (line 8) she tells him , at the same time wanting
+      (line 9) him to tell her more.
+      (line 10) Shyly , she asks , " I mean , Daddy , is there ? "
+  ```
+
+- 测试样例3：逻辑或查询 (hair | Alice)
+
+  ```c++
+  Executing Query for: (hair | Alice)
+  (hair | Alice) occurs 2 times
+      (line 1) Alice Emma has long flowing red hair .
+      (line 3) through her hair , it looks almost alive ,
+  ```
+
+- 测试样例4：逻辑与查询 (hair & Alice)
+
+  ```c++
+  Executing Query for: (hair & Alice)
+  (hair & Alice) occurs 1 time
+      (line 1) Alice Emma has long flowing red hair .
+  ```
+
+- 测试样例5：混合使用算符 ((fiery & bird) | wind)
+
+  ```c++
+  ((fiery & bird) | wind) occurs 3 times
+      (line 2) Her Daddy says when the wind blows
+      (line 4) like a fiery bird in flight .
+      (line 5) A beautiful fiery bird , he tells her ,
+  ```
+
+
+
+### 1.面向对象的解决方案
+
+- 基于12.3的TextQuery类来表示对一个单词的查询，QueryResult类来表示查询的结果
+
+- 应将不同的查询建模为独立的类，它们由同一个基类派生而来
+
+  - WordQuery类用于查询单个单词
+  - NotQuery类用于查询单个单词的非
+  - OrQuery类用于查询两个单词的或
+  - AndQuery类用于查询两个单词的与
+
+- 这些类需要包含两个操作（成员函数）：
+
+  - eval方法：接受一个TextQuery对象，返回一个QueryResult结果
+  - rep方法：返回一次查询的string描述，如”((fiery & bird) | wind)”
+
+- 继承和成员的区别：
+
+  - `is a`建模：继承关系，A是一种B
+  - `has a`建模：成员关系，A是B的一部分
+
+- 抽象基类定义公共接口：
+
+  - 四个查询类之间不存在彼此继承，而是互为兄弟。应定义公共的抽象基类Query_base来表示所有类的共同接口
+
+  - 抽象基类Query_base中应将eval和rep方法都定义为纯虚函数，使用到的4个派生类都必须自定义版本覆盖它们
+
+  - WordQuery和NotQuery是一元查找，OrQuery和AndQuery是二元查找。应定义抽象基类BinaryQuery来表示二元查找的接口
+
+  - 最终的继承关系如图15.2 
+
+    <div align="center">  
+      <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/63.png"  width="600"/> 
+    </div>
+
++ 用统一的接口隐藏继承体系：
+
+  - 用户不会直接使用继承体系中的类，而是定义一个接口类Query，配合算符来调用这4个派生类
+
+  - 接口类使用形式：Query q=Query(“fiery”)&Query(“bird”)|Query(“wind”);
+
+  - 接口类Query中保存抽象基类Query_base的指针，该指针绑定到4个派生类之一的对象
+
+  - 用户代码使用接口类Query来间接创建并处理继承体系中的对象，方式是对Query类定义接受string的构造函数，并重载与或非算符
+
+    - &算符生成新的AndQuery对象和新的Query对象，后者中保存前者的指针
+    - |算符生成新的OrQuery对象和新的Query对象，后者中保存前者的指针
+    - ~算符生成新的NotQuery对象和新的Query对象，后者中保存前者的指针
+    - 接受string的构造函数生成新的WordQuery对象和新的Query对象，后者中保存前者的指针
+
+  - 将一个表达式看成一棵`树`，树上每个`节点`都是一个接口类Query的对象及其底层维护的对象。叶子节点底层是WordQuery，进行真正的查找工作。非叶子节点根据其子节点的结果来算出自己的结果。非节点有一个子节点，与节点和或节点有两个子节点
+
+  - 如图15.3是一个表达式创建的对象们，对表达式求值就是沿着箭头依次对每个对象求值。
+
+    <div align="center">  
+      <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/64.png"  width="600"/> 
+    </div>
+
++ 如表15.1是该程序的设计
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/65.png"  width="600"/> 
+  </div>
+
+
+
+### 2.Query_base类和Query类
+
+- 在这里定义所有类的共同基类Query_base和所有操作的共同接口Query
+
+  ```c++
+  //所有类的抽象基类
+  //没有public成员，不希望用户或派生类直接使用它。对它的任何访问都需通过接口类Query
+  class Query_base{
+      friend class Query;             //使接口类可访问基类资源
+  protected:
+      using line_no=TextQuery::line_no;
+      virtual ~Query_base()=default;  //虚析构函数是protected
+  private:
+      //两个纯虚函数，需要实例化的4个派生类必须用自定义版本覆盖它们
+      virtual QueryResult eval(const TextQuery &) const =0;
+      virtual std::string rep() const =0;
+  };
+  
+  //接口类
+  class Query{
+      //使三个算符可访问接口类资源
+      friend Query operator~(const Query &);
+      friend Query operator|(const Query &,const Query &);
+      friend Query operator&(const Query &,const Query &);
+  public:
+      Query(const std::string &);
+      //对接口类调用eval和rep，实际是对接口类管理的继承体系中的类调用eval和rep
+      QueryResult eval(const TextQuery &t) const
+                      {return q->eval(t);}
+      std::string rep() const {return q->rep();}
+  private:
+      //由于不希望用户使用Query_base，故用指针构造Query是private操作，只能被其友元（即三个算符）调用
+      Query(std::shared_ptr<Query_base> query):q(query){}
+      //真正执行任务的是继承体系中的类对象，用指针管理它的资源以保证动态绑定
+      std::shared_ptr<Query_base> q;
+  };
+  //打印一个query的描述
+  std::ostream &operator<<(std::ostream &os,const Query &query){
+      return os<<query.rep();
+  }
+  ```
+
+  
+
+### 3.派生类
+
+- 在这里定义使用表达式构建出一棵树的框架
+
+  - 定义用搜索词string/与或非算符如何构造出一个节点（包括接口Query和底层对象）
+  - 定义父节点与子节点的关系（用子节点的Query创建父节点，子节点的Query是父节点中的成员）
+
+  ```c++
+  //叶子节点，最基础的单词查找类，也是唯一一个真正执行查找的类。另外几个类都是基于它的结果来计算自己的结果
+  //所有成员都是private，只有友元（接口类）能访问它：使用关键词string创建接口类对象时为其创建WordQuery对象
+  class WordQuery: public Query_base{
+      friend class Query;
+      //叶子节点真正需要查找，故用查找词的string来初始化
+      WordQuery(const std::string &s):query_word(s){};
+      //唯一一个真正使用TextQuery操作来实现查询的类
+      QueryResult eval(const TextQuery &t) const
+                      {return t.query(query_word);}
+      std::string rep() const {return query_word;}
+      std::string query_word;
+  };
+  //用关键词创建Query时，实际是创建WordQuery对象，并封装进接口类Query中
+  inline Query::Query(const std::string &s):q(new WordQuery(s)){}
+  
+  //拥有一个子节点，根据子节点Query的结果来算出其非操作
+  //所有成员都是private，只有友元（operator~）能访问它：使用operator~创建接口类对象时为其创建NotQuery对象
+  class NotQuery: public Query_base{
+      friend Query operator~(const Query &);
+      //NotQuery需用子节点的Query初始化，因为是对子节点的结果取非
+      NotQuery(const Query &q):query(q){}
+      std::string rep() const {return "~("+query.rep()+")";}
+      QueryResult eval(const TextQuery &) const;
+      //底层维护子节点的Query对象，NotQuery的结果是对子节点Query对象的结果取非
+      Query query;
+  };
+  //用operator~创建Query时，实际是创建NotQuery对象，并封装进接口类Query中
+  inline Query operator~(const Query &operand){
+      return std::shared_ptr<Query_base>(new NotQuery(operand));
+  }
+  
+  //拥有两个子节点，是二元query的抽象基类，定义二元操作的公共接口
+  //没有public成员，不希望用户访问它。只能创建它的派生类
+  class BinaryQuery: public Query_base{
+  protected:
+      //BinaryQuery需用两个子节点的Query和一个op初始化，因为是对这两个子节点的Query结果使用该op
+      BinaryQuery(const Query &l,const Query &r,std::string s):
+                 lhs(l),rhs(r),opSym(s) {}
+      //定义了自己的rep，但eval继承了Query_base的纯虚函数定义
+      std::string rep() const 
+                     {return "("+lhs.rep()+" "+opSym+" "+rhs.rep()+")";}
+      //底层维护两个子节点的Query对象和一个op，BinaryQuery的结果是对两个子节点Query对象的结果取op
+      Query lhs,rhs;
+      std::string opSym;
+  };
+  
+  //拥有两个子节点，根据两个子节点Query的结果来算出其与操作
+  //所有成员都是private，只有友元（operator&）能访问它：使用operator&创建接口类对象时为其创建AndQuery对象
+  class AndQuery: public BinaryQuery{
+      friend Query operator&(const Query &,const Query &);
+      //AndQuery需用两个子节点的Query初始化，因为是对这两个子节点Query的结果求与
+      AndQuery(const Query &left,const Query &right):
+              BinaryQuery(left,right,"&") {}
+      //只有自己的eval函数，rep在抽象基类BinaryQuery中已定义好
+      QueryResult eval(const TextQuery &) const;
+  };
+  //用operator&创建Query时，实际是创建AndQuery对象，并封装进接口类Query中
+  inline Query operator&(const Query &lhs,const Query &rhs){
+      return std::shared_ptr<Query_base>(new AndQuery(lhs,rhs));
+  }
+  
+  //拥有两个子节点，根据两个子节点Query的结果来算出其或操作
+  //所有成员都是private，只有友元（operator|）能访问它：使用operator|创建接口类对象时为其创建OrQuery对象
+  class OrQuery: public BinaryQuery{
+      friend Query operator|(const Query &,const Query &);
+      //OrQuery需用两个子节点的Query初始化，因为是对这两个子节点Query的结果求或
+      OrQuery(const Query &left,const Query &right):
+             BinaryQuery(left,right,"|") {}
+      //只有自己的eval函数，rep在抽象基类BinaryQuery中已定义好
+      QueryResult eval(const TextQuery &) const;
+  };
+  //用operator|创建Query时，实际是创建OrQuery对象，并封装进接口类Query中
+  inline Query operator|(const Query &lhs,const Query &rhs){
+      return std::shared_ptr<Query_base>(new OrQuery(lhs,rhs));
+  }
+  ```
+
+
+
+### 4.eval函数
+
+- 在这里定义父节点如何根据子节点的结果计算自己的结果
+
+  ```c++
+  //OrQuery对其两个子节点的Query求或
+  QueryResult OrQuery::eval(const TextQuery &text) const {
+      //分别求两个子节点的结果
+      auto left=lhs.eval(text),right=rhs.eval(text);
+      //定义一个set，将左右子节点的结果都insert进去，作为或操作的结果
+      auto ret_lines=std::make_shared<std::set<line_no>>(left.begin(),left.end());
+      ret_lines->insert(right.begin(),right.end());
+      return QueryResult(rep(),ret_lines,left.get_file());
+  }
+  
+  QueryResult AndQuery::eval(const TextQuery &text) const {
+      //分别求两个子节点的结果
+      auto left=lhs.eval(text),right=rhs.eval(text);
+      //定义一个set，使用算法set_intersection来求两个子节点结果的交，放入set作为与操作的结果
+      auto ret_lines=std::make_shared<std::set<line_no>>();
+      std::set_intersection(left.begin(),left.end(),
+                            right.begin(),right.end(),
+                            std::inserter(*ret_lines,ret_lines->begin()));
+      return QueryResult(rep(),ret_lines,left.get_file());
+  }
+  
+  QueryResult NotQuery::eval(const TextQuery &text) const {
+      //求子节点的结果
+      auto result=query.eval(text);
+      //定义set存放最终结果
+      auto ret_lines=std::make_shared<std::set<line_no>>();
+      auto beg=result.begin(),end=result.end();
+      auto sz=result.get_file()->size();
+      //对行号遍历。若行号不在子节点结果中则插入set，作为非操作的结果
+      for(size_t n=0;n!=sz;++n){
+          //这个if-elif的理论基础是：遍历子节点结果和遍历行号都是升序
+          if(beg==end || *beg!=n) //若查完子节点结果，或当前子节点结果不等于当前行号，则将当前行号插入set
+              ret_lines->insert(n);
+          else if(beg!=end)       //未查完子节点结果，且当前子节点结果等于当前行号，则取子节点结果中的下一个
+              ++beg;
+      }
+      return QueryResult(rep(),ret_lines,result.get_file());
+  }
+  ```
+
+- 封装：将上述定义按顺序放入文件中，并添加头文件和头文件保护，封装为hpp：
+
+  ```c++
+  //文件名：OOP_TextQuery.hpp
+  #ifndef __OOP_TEXTQUERY_HPP__
+  #define __OOP_TEXTQUERY_HPP__
+  #include<string>
+  #include<vector>
+  #include<set>
+  #include<algorithm>
+  #include"TextQuery.hpp"
+  /* 上面的定义 */
+  #endif
+  ```
+
+- 测试：建立cpp文件，包含上述头文件
+
+  ```c++
+  //文件名：OOP_TextQuery_demo.cc
+  #include<fstream>
+  #include<iostream>
+  #include"TextQuery.hpp"
+  #include"OOP_TextQuery.hpp"
+  int main(){
+      std::ifstream infile("./OOP_TextQuery_test.txt");
+      TextQuery tq(infile);
+      //如下5个定义是5个测试样例
+      //Query q=Query("Daddy");
+      //Query q=~Query("Alice");
+      //Query q=Query("hair")|Query("Alice");
+      //Query q=Query("hair")&Query("Alice");
+      //Query q=Query("fiery")&Query("bird")|Query("wind");
+      std::cout<<"Executing Query for: "<<q.rep()<<std::endl;
+      QueryResult res=q.eval(tq);
+      print(std::cout,res)<<std::endl;
+  }
+  ```
+
+  
