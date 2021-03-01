@@ -686,11 +686,396 @@
 
 
 
+## 二.模板实参推断
+
+- `模板实参推断`：调用函数模板时，从函数实参来推断模板实参
+- 编译器使用函数调用中的实参类型来推断模板实参，用这些实参生成的函数版本与给定调用最为匹配（不一定有唯一匹配，也不总是精确匹配）
+
+### 1.类型转换与模板类型参数
+
+- 调用函数模板时传递给函数的实参被用于初始化函数形参。若该形参的类型使用了模板类型参数，则采用特殊的初始化规则：
+
+  - 编译器通常不对实参进行类型转换，而是生成新的模板实例。例如算术转换、派生类向基类的转换、用户定义的转换，都不能应用于函数模板（它们会生成不需类型转换的新实例，而不是匹配到需要类型转换的实例）
+  - 只有有限的几种`类型转换`会被应用于函数模板的实参（即通过类型转换将不同实参对应到同一实例）
+    - 顶层const无论在形参还是实参中都会被忽略
+    - const转换：可将非const对象的引用/指针传递给const的引用/指针形参
+    - 数组/函数指针的转换：若函数形参不是引用类型，则可将数组或函数类型的实参转为指针（若形参是引用则不会转换）
+
+- 将实参传递给带模板类型的函数形参时，自动应用的类型转换只有`const转换`和`数组/函数到指针`的转换
+
+- 例子：调用模板函数时的类型转换
+
+  ```c++
+  template <typename T>
+  T fobj(T,T);                    //实参被拷贝
+  template <typename T>
+  T fref(const T &,const T &);    //传常量引用
+  string s1("a value");
+  const string s2("another value");
+  fobj(s1,s2);                    //调用fobj(string,string)，s2的顶层const被忽略
+  fref(s1,s2);                    //调用fref(const string &,const string &)，s1可转换为底层const
+  int a[10],b[42];
+  fobj(a,b);                      //调用fobj(int *,int *)，数组被转为指针
+  fref(a,b);                      //错，形参是引用，数组不会转指针，故a与b类型不一致（大小不同），无法实例化
+  ```
+
+- 一个模板类型参数用作多个形参时，传递给它们的实参必须有相同的类型（或可进行const转换或数组/函数到指针的转换）。若根据不同实参推出的类型参数不同，则调用错误
+
+- 若希望多个形参各自接受类型不同的实参，可为它们赋予不同的模板类型参数
+
+- 例子：定义不同的模板类型参数，允许实参类型不同
+
+  ```c++
+  template <typename T>
+  int compare(const T &,const T &);           //接受的两个实参类型必须相同，或进行const转换或数组/函数到指针的转换
+  template <typename A,typename B>
+  int flexibleCompare(const A &,const B &);   //接受的两个实参类型不必相同
+  long lng;
+  compare(lng,1024);                          //错，由long和int推出的类型参数T不同
+  flexibleCompare(lng,1024);                  //对，不是同一个类型参数，允许不同
+  ```
+
+- 对于不含模板类型参数的函数形参，不进行特殊处理，遵循普通函数的实参到形参转换规则
+
+- 例子：不含模板类型参数的形参遵循普通函数的转换规则
+
+  ```c++
+  template <typename T>
+  ostream &print(ostream &os,const T &obj){   //一个形参不含模板类型，一个形参含有模板类型
+      return os<<obj;
+  }
+  print(cout,42);                             //实例化print(ostream &,int)
+  ofstream f("output");
+  print(f,10);                                //使用print(ostream &,int)，第一个参数遵循类型转换
+  ```
 
 
 
+### 2.函数模板显式实参
+
+- 显式提供函数模板实参常用于两种情形：
+
+  - 有时候编译器无法推断模板实参的类型（例如该类型只出现在返回类型/函数体中，不在形参列表中）
+  - 有时候希望允许用户手动控制模板的实例化
+
+- 当函数返回的类型与形参列表的任何类型都不相同时，经常需要提供显式模板实参
+
+- `显式模板实参`：在函数名后用尖括号`<>`提供模板实参，类似类模板的实例化
+
+- 显式模板实参按从左到右的顺序与模板参数列表匹配，只有处于模板参数列表尾部且可由实参推导出的才可忽略
+
+- 设计需提供显式实参的模板时，应将需提供显式实参的模板参数放在模板参数列表最前面
+
+- 例子：显式提供函数模板的实参
+
+  ```c++
+  template <typename T1,typename T2,typename T3>
+  T1 sum(T2,T3);                                          //T1不可推导，需手动指定。T2和T3可推导且在列表最后，实例化时可忽略
+  int i;
+  long lng;
+  auto val3=sum<long long>(i,lng);                        //实例化出long long sum(int,long);
+  //糟糕的设计：必须指定所有模板实参才行
+  template <typename T1,typename T2,typename T3>
+  T3 alternative_sum(T2,T1);
+  auto val2=alternative_sum<long,int,long long>(i,lng);   //实例化出long long alternative_sum(int,long);
+  auto val3=alternative_sum<long long>(i,lng);            //错，显式模板实参按绑定，T3仍未知
+  ```
+
+- 对于使用显式模板实参指定了的模板参数，与其相关的形参类型也被指定。此时实参到形参遵循普通函数的类型转换
+
+- 例子：显式提供模板实参后使用普通函数的实参类型转换
+
+  ```c++
+  template <typename T> int compare(const T &,const T &v2);
+  long lng;
+  compare(lng,1024);          //错，long和int不可推导出同一种类型
+  compare<long>(lng,1024);    //实例化compare(long,long)，使用普通函数的实参转换
+  compare<int>(lng,1024);     //实例化compare(int,int)，使用普通函数的实参转换
+  ```
 
 
+
+### 3.尾置返回类型与类型转换
+
+- 当函数模板的返回类型不可由实参直接推导得到时，可以用显式模板实参，但这是不必要的（可以在模板内部解决的问题尽量少留给用户）
+
+- 另一种解决方案是使用`decltype`从函数体内的局部变量中推出返回类型，而不使用模板参数
+
+- 只能在`尾置返回类型`中decltype局部变量，因为前置返回类型不在函数的作用域中
+
+- 例子：尾置返回中使用decltype确定函数模板的返回类类型
+
+  ```c++
+  emplate <typename It>
+  auto fcn(It beg,It end) -> decltype(*beg){  //对解引用的结果decltype得到引用，只能传引用不能传值
+      return *beg;
+  }
+  vector<int> vi={0,1,2,3};
+  Blob<string> ca={"hi","bye"};
+  auto &i=fcn(vi.begin(),vi.end());           //fcn返回int &
+  auto &s=fcn(ca.begin(),ca.end());           //fcn返回string &
+  ```
+
+- `类型转换模板`：有时无法直接从decltype中获取需要的类型（例如对解引用的结果decltype得到引用，而有时候不希望得到引用），可使用标准库的`类型转换模板`，它们定义于头文件`type_traits`，该头文件中的类通常用于`模板元编程`
+
+- 可使用`remove_reference`模板来脱去类型中的引用。它有一个模板类型参数和一个名为`type`的public成员。若用一个引用类型实例化remove_reference，则其type成员是脱去引用的类型
+
+- 在模板中使用`remove_reference<???>::type`时，由于remove_reference的模板参数在编译期未知，故必须在其前面加上`typename`来说明这是一个类型
+
+- 例子：使用remove_reference来脱去引用
+
+  ```c++
+  template <typename It>
+  //remove_reference的模板参数是需要被脱引用的类型，其type成员是脱去引用后的类型
+  //需使用typename的原因是无法在编译期确定remove_reference<decltype(*beg)>::type是类型还是static成员
+  auto fcn2(It beg,It end) -> typename remove_reference<decltype(*beg)>::type{
+      return *beg;
+  }
+  ```
+
+- 标准库的每个类型转换模板：
+
+  - 都有一个模板参数，表示转换前的类型
+  - 都有一个名为type的public成员，表示转换得到的类型
+  - 若不能或不必转换，则type成员就是模板参数本身
+
+- 标准库提供的类型转换模板在表16.1中：
+
+  <div align="center">  
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/66.png"  width="600"/> 
+  </div>
+
+
+
+### 4.函数指针和实参推断
+
+- 用一个函数模板来初始化或赋值给一个函数指针时，编译器用指针的类型来推断模板实参（即从左边的类型推断右边的类型）。
+
+- 若无法从函数指针的类型来推导函数模板的类型，则产生错误（可通过显式实例化来解决）
+
+- 当函数指针被函数模板初始化/赋值时，必须保证每个模板参数都能唯一地确定其类型或值
+
+- 例子：函数模板用于初始化/赋值给函数指针
+
+  ```c++
+  template <typename T> int compare(const T &,const T &); //函数模板
+  int (*pf1)(const int &,const int &)=compare;            //用函数模板初始化函数指针，从函数指针的类型中推导模板参数
+  //重载func使其可接受两种类型的函数指针
+  void func(int(*)(const string &,const string &));
+  void func(int(*)(const int &,const int &));
+  func(compare);                                          //错，无法判断是哪个重载的func，模板参数不能确定
+  func(compare<int>);                                     //对，显式指出模板实例化为compare(const int &,const int &)
+  ```
+
+  
+
+### 5.模板实参推断和引用
+
+- 当形参是模板类型参数的引用时：
+
+  - 若形参是模板类型参数的`左值引用T &`，则可给它传递左值。实参可以是const或非const，若实参是const则T被推断为const
+  - 若形参是模板类型参数的`常量左值引用const T &`，则可给它传递任何类型的实参。此时T不会被推断为const，因为const在形参中已经有了
+  - 若形参是模板类型参数的`右值引用T &&`，则可给它传递右值。此时推断出的T类型是该右值实参的类型
+
+- 例子：形参是模板类型参数的引用
+
+  ```c++
+  int i;
+  const int ci;
+  //形参是模板类型参数的左值引用T &
+  template <typename T> void f1(T &);
+  f1(i);  //T是int
+  f1(ci); //T是const int，因为const的实参不可传递给非const的引用形参
+  f1(5);  //错，传给左值引用的实参必须是左值
+  //形参是模板类型参数的常量左值引用const T &
+  template <typename T> void f2(const T &);
+  f2(i);  //T是int，因为非const的实参可传递给const的引用形参，const在形参中已有
+  f2(ci); //T是int，因为const在函数形参中已有
+  f2(5);  //T是int，因为const引用可绑定到右值
+  //形参是模板类型参数的右值引用T &&
+  template <typename T> void f3(T &&);
+  f3(42); //T是int
+  ```
+
+- 通常不能将右值引用绑定到左值上，但C++有两个例外：
+
+  - `右值引用的模板参数推断`：将`type`类型的左值传递给函数的右值引用形参`T &&`，且该右值引用形参指向模板类型参数`T`时，编译器推断模板类型参数`T`为实参的左值引用类型`type &`
+  - `引用折叠`：通常不可直接定义引用的引用，但通过`类型别名`或`模板参数推断`（如上一条）可间接创建引用的引用，此时这些引用折叠为一个引用，折叠规则：
+    - `T & &`、`T & &&`、`T && &`都折叠为`T &`
+    - `T && &&`折叠为`T &&`
+
+- 以上两个规则组合：若函数形参是指向模板类型参数`T`的右值引用`T &&`，则它可被绑定到左值。若传入的实参是`type`类型的左值，则推断出的模板参数类型`T`是左值引用`type &`，函数形参也是左值引用`type &`
+
+- 例子：模板参数类型右值引用的形参被折叠为左值引用
+
+  ```c++
+  /* 上下文：上例中的i、ci、f3 */
+  f3(i);  //T被推断为int &，形参int & &&被折叠为int &
+  f3(ci); //T被推断为const int &，形参const int & &&被折叠为const int &
+  ```
+
+- `万能引用`：若一个函数形参是指向模板参数类型`T`的右值引用`T &&`，则可给它传递任意类型（左值或右值）的实参：
+
+  - 传入左值时，`T`是实参类型的左值引用，形参被折叠为实参类型的左值引用
+  - 传入右值时，`T`是实参类型的非引用，形参是实参类型的右值引用
+
+- 由于万能引用导致只有在运行时才能确定形参是左值还是右值，以及模板参数是左值引用还是非引用，这使模板的编写变得困难。
+
+- 实际中，模板类型参数右值引用的形参通常用于两种情况：`模板转发实参`（16.2.7）或`模板重载`（16.3）
+
+- 使用模板类型参数右值引用的形参通常重载为两个版本：const左值（`拷贝`）和非const右值（`移动`）
+
+- 例子：对模板类型参数右值引用的形参进行重载
+
+  ```c++
+  template <typename T> void f(const T &);    //拷贝版本，绑定到左值和const右值
+  template <typename T> void f(T &&);         //移动版本，绑定到非const右值
+  ```
+
+
+
+### 6.理解std::move
+
+- `std::move()`是使用模板类型参数的右值引用作为形参的一个好例子
+
+- 使用std::move()可获得一个绑定到左值上的右值引用，它可接受任何类型实参，故是一个函数模板
+
+- 例子：std::move()的实现
+
+  ```c++
+  template <typename T>
+  //形参是万能引用：传入左值时T是左值引用，t是左值引用；传入右值时T是非引用，t是右值引用
+  //返回类型是先将T脱去引用再加上右值引用：传入左值和右值都返回右值引用
+  typename remove_reference<T>::type &&move(T &&t){
+      //remove_reference<T>::type &&是先将T脱去引用再加上右值引用，保证返回类型一定是右值引用
+      //无论传入左值还是右值，即无论t是左值引用还是右值引用，都强制转换为右值引用
+      return static_cast<typename remove_reference<T>::type &&>(t);
+  }
+  ```
+
+- 由于std::move()的形参是万能引用，故可传递左值也可传递右值，返回类型都是右值引用。
+
+  - 若传入`type`类型的`右值`，则：
+    - `T`是`type`
+    - `t`的类型是`type &&`
+    - 返回类型`remove_reference<T>::type &&`是`type &&`
+    - 函数头是`type &&move(type &&)`
+  - 若传入`type`类型的`左值`，则：
+    - `T`是`type &`
+    - `t`的类型是`type &`
+    - 返回类型`remove_reference<T>::type &&`是`type &&`
+    - 函数头是`type &&move(type &)`
+
+- 不能隐式地将左值转换为右值引用，但可用`static_cast`显式转换。
+
+- 将右值引用绑定到左值可以`截断左值`（即在这之后失去左值特性）。有时候截断左值是安全的，例如移动对象时。但必须强制使用static_cast，避免发生意外的截断
+
+- 截断左值很容易，只需static_cast。但最好统一使用std::move()，它更好用且更易于查找程序中哪里截断了左值
+
+
+
+### 7.转发
+
+- 某些函数需要将其多个实参连同类型不变地转发给其他函数，此时需保持被转发的实参的所有性质，包括是否是const、左值/右值。
+
+- 直接使用模板类型参数作为函数形参时无法保留传入实参的左值属性。因为将左值传入时发生拷贝，外部的值不会被内部代码改变，即转发该实参时失去左值属性
+
+- 例子：转发时若存在拷贝，则无法保留顶层const和引用
+
+  ```c++
+  //该函数用于将参数转发给另一个函数，另一个函数也是它的参数
+  template <typename F,typename T1,typename T2>
+  void flip1(F f,T1 t1,T2 t2){
+      f(t2,t1);           //该函数用于转发时改变两参数的顺序
+  }
+  //内部调用的函数，有一个参数是引用
+  void f(int v1,int &v2){ //传入v2是引用，在函数内改变v2会影响外部
+      cout<<v1<<" "<<++v2<<endl;
+  }
+  //通过f直接调用和flip1转发调用的区别：无法保留引用
+  int i,j;
+  f(42,i);                //运行f后i被改变，因为第二个参数是引用
+  flip1(f,j,42);          //运行flip后j不会被改变，因为实例化flip1时T1和T2都是int，在转发时被拷贝了
+  ```
+
+- 在函数模板的形参中：
+
+  - 使用引用可保证转发时实参的const属性被保留，因为引用类型中的const是底层const，实参为const时形参中的`T &`和`T &&`都会将T实例化为带const的类型
+  - 使用右值引用可保证转发时实参的所有属性（包括const属性和左右值属性）被保留，因为此时的右值引用是万能引用，通过引用折叠可保留左值/右值属性
+
+- 一个变量是右值引用，但它本身是左值，不可被转发给接受右值引用的函数
+
+- 例子：使用右值引用保证转发时实参的所有属性被保留，但将变量转发给接受右值引用的函数会出错
+
+  ```c++
+  //使用模板类型参数的右值引用作为参数，转发时保留实参的const属性和左右值属性
+  template <typename F,typename T1,typename T2>
+  void flip2(F f,T1 &&t1,T2 &&t2){    //t1和t2可能是指向右值的引用，但它们本身一定是变量，即是左值
+      f(t2,t1);
+  }
+  //内部调用的函数，接受右值引用
+  void g(int &&i,int &j){             //传入i是右值引用，不可接受左值
+      cout<<i<<" "<<j<<endl;
+  }
+  //可保留实参所有属性，但无法将右值转发给接受右值引用的函数
+  int i;
+  flip2(g,i,42);                      //错，42导致flip2中的t2是右值引用，但t2是变量（左值），不可传递给g的右值引用形参
+  ```
+
+- 函数`std::forward<type>(arg)`接受一个显式模板实参和一个变量，返回该显式模板实参类型的右值引用，即`std::forward<T>`的返回类型是`T &&`
+
+- std::forward和std::move都定义于头文件`utility`
+
+- 通常使用std::forward传递那些定义为模板类型参数的右值引用的函数参数。通过返回类型的引用折叠，可保证给定实参的左右值属性
+
+- 例子：使用std::forward的情形
+
+  ```c++
+  template <typename Type>
+  intermediary(Type &&arg){               //此处的右值引用是万能引用
+      finalFcn(std::forward<Type>(arg));  //std::forward的返回值不是变量，且可保留转发参数的所有性质
+  }
+  ```
+
+- std::forward可保留传入参数的所有属性：
+
+  - 若传入实参是右值，则Type是非引用，arg是右值引用，std::forward的返回值Type &&是右值引用
+  - 若传入实参是左值，则Type是左值引用，arg是左值引用，std::forward的返回值Type &&折叠为左值引用
+
+- 上述代码可实现`完美转发`：
+
+  - 通过右值引用（`万能引用`）在传入外层函数时保留实参的全部属性
+  - 通过`std::forward`在传入内层函数时保留实参的全部属性
+
+- std::forward比std::move更灵活：
+
+  - std::forward可指定模板参数，且可对返回值使用引用折叠来保留左右值属性
+  - std::move返回一定是右值引用
+
+- std::forward和std::move最好都不要使用using声明，而应显式指明是`std::`中的
+
+- 例子：使用万能引用和std::forward实现完美转发
+
+  ```c++
+  //使用万能引用和std::forward实现完美转发
+  template <typename F,typename T1,typename T2>
+  void flip(F f,T1 &&t1,T2 &&t2){                     //传入外层函数时使用万能引用保留实参的所有性质
+      f(std::forward<T2>(t2),std::forward<T1>(t1));   //传入内层函数时使用std::forward保留实参的所有性质（尤其是，不再是变量）
+  }
+  //内部调用的函数，接受右值引用
+  void g(int &&i,int &j){                             //传入i是右值引用，不可接受左值
+      cout<<i<<" "<<j<<endl;
+  }
+  //整个转发过程中都保留实参的所有属性
+  int i;
+  flip(g,i,42);   /* 在该调用中：
+                   * 第一步通过右值引用（万能引用）在传入外层函数时保留属性。T1是int &，T2是int &&，
+                   * 第二步通过std::forward在传入内层函数时保留属性。std::forward<T1>是int &，std::forward<T2>是int &&
+                   * 最终传入f的两个实参分别为int &&和int &，与最外层的实参完全一致
+                   */
+  ```
+
+  
 
 
 
