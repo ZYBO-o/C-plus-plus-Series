@@ -9,7 +9,17 @@
 
 ## 二.构造/析构/赋值运算
 
+* [5.了解C++默认编写并调用哪些函数](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Constructors%2CDestruction%2C%20and%20Assignment%20Operators.md#5%E4%BA%86%E8%A7%A3c%E9%BB%98%E8%AE%A4%E7%BC%96%E5%86%99%E5%B9%B6%E8%B0%83%E7%94%A8%E5%93%AA%E4%BA%9B%E5%87%BD%E6%95%B0)
 
+* [6.若不想使用编译器自动生成的函数，就该明确拒绝](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Constructors%2CDestruction%2C%20and%20Assignment%20Operators.md#6%E8%8B%A5%E4%B8%8D%E6%83%B3%E4%BD%BF%E7%94%A8%E7%BC%96%E8%AF%91%E5%99%A8%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E7%9A%84%E5%87%BD%E6%95%B0%E5%B0%B1%E8%AF%A5%E6%98%8E%E7%A1%AE%E6%8B%92%E7%BB%9D)
+
++ [7.为多基类声明virtual析构函数](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Constructors%2CDestruction%2C%20and%20Assignment%20Operators.md#7%E4%B8%BA%E5%A4%9A%E5%9F%BA%E7%B1%BB%E5%A3%B0%E6%98%8Evirtual%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0)
++ [8.别让异常逃离析构函数](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Constructors%2CDestruction%2C%20and%20Assignment%20Operators.md#8%E5%88%AB%E8%AE%A9%E5%BC%82%E5%B8%B8%E9%80%83%E7%A6%BB%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0)
++ [9.绝不在构造和析构过程中调用virtual函数](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Constructors%2CDestruction%2C%20and%20Assignment%20Operators.md#9%E7%BB%9D%E4%B8%8D%E5%9C%A8%E6%9E%84%E9%80%A0%E5%92%8C%E6%9E%90%E6%9E%84%E8%BF%87%E7%A8%8B%E4%B8%AD%E8%B0%83%E7%94%A8virtual%E5%87%BD%E6%95%B0)
++ [10.令operator = 返回一个reference to * this](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Constructors%2CDestruction%2C%20and%20Assignment%20Operators.md#10%E4%BB%A4operator--%E8%BF%94%E5%9B%9E%E4%B8%80%E4%B8%AAreference-to--this)
+
++ [11.在operator = 中处理"自我赋值"](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Constructors%2CDestruction%2C%20and%20Assignment%20Operators.md#11%E5%9C%A8operator--%E4%B8%AD%E5%A4%84%E7%90%86%E8%87%AA%E6%88%91%E8%B5%8B%E5%80%BC)
++ [12.复制对象时勿忘其每一个成分](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Constructors%2CDestruction%2C%20and%20Assignment%20Operators.md#12%E5%A4%8D%E5%88%B6%E5%AF%B9%E8%B1%A1%E6%97%B6%E5%8B%BF%E5%BF%98%E5%85%B6%E6%AF%8F%E4%B8%80%E4%B8%AA%E6%88%90%E5%88%86)
 
 ## 三.资源管理
 
