@@ -2,10 +2,10 @@
 
 ## 一.让自己习惯C++
 
-+ [1.视C++为一个语言联邦]()
-+ [2.尽量以 const, enum, inline 替换 #define]()
-+ [3.尽可能使用 const]()
-+ [4.确定对象被使用前已先被初始化]()
++ [1.视C++为一个语言联邦](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Accustoming%20Yourself%20to%20C%2B%2B.md#1%E8%A7%86c%E4%B8%BA%E4%B8%80%E4%B8%AA%E8%AF%AD%E8%A8%80%E8%81%94%E9%82%A6)
++ [2.尽量以 const, enum, inline 替换 #define](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Accustoming%20Yourself%20to%20C%2B%2B.md#2%E5%B0%BD%E9%87%8F%E4%BB%A5-const-enum-inline-%E6%9B%BF%E6%8D%A2-define)
++ [3.尽可能使用 const](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Accustoming%20Yourself%20to%20C%2B%2B.md#3%E5%B0%BD%E5%8F%AF%E8%83%BD%E4%BD%BF%E7%94%A8const)
++ [4.确定对象被使用前已先被初始化](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Accustoming%20Yourself%20to%20C%2B%2B.md#4%E7%A1%AE%E5%AE%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%A2%AB%E4%BD%BF%E7%94%A8%E5%89%8D%E5%B7%B2%E8%A2%AB%E5%88%9D%E5%A7%8B%E5%8C%96)
 
 ## 二.构造/析构/赋值运算
 

@@ -9,6 +9,10 @@
   + [static 的小细节](#static-的小细节)
 
 + [3.尽可能使用const](#3尽可能使用const)
+  + [修饰变量]()
+  + [修饰指针]()
+  + [修饰迭代器]()
+  + [在类中修饰成员函数]()
 + [4.确定面向对象被使用前已被初始化](#4确定面向对象被使用前已被初始化)
   + [内置对象，STL和自定义类](#内置对象stl和自定义类)
   + [内置对象，STL和自定义类](#不同编译单元内定义的non-local-static-对象)
@@ -157,6 +161,148 @@ const int GamePlayer::NumTurns; //NumTurns的定义
 ---
 
 ### 3.尽可能使用const
+
+const是常量的意思，它可以定义一个不可改变的量，主要用于以下几个地方：
+
+#### 修饰变量
+```c++
+const int var = 3;
+```
+
+此时var的值就不能改变了。也正是因为const的变量不能轻易修改存储的值， **所以在声明的时候就要初始化** ，这样就是不行的：
+
+```c++
+const int var;
+```
+
+编译器就会报错。
+
+#### 修饰指针
+
+指针是特殊的变量，有时我们希望对它所指向的对象操作，而有时我们又希望对指针本身进行操作。同样，const应用于指针也有两个含义：
+
++ 一个是指向常量（指向的内容不可更改）
++ 一个是常量指针（指针的指向不可更改）
+
+```c++
+/* p为指向常量的指针，即p指向的对象是常量，不可以通过*p = 3 来修改a的值，但这时p = &b换个指向还是可以的 */
+const int* p = &a;
+/* p为常量指针，即p的指向不可更改，不可以通过p = &b来修改p的指向，但这时*p = 3改变a的值还是可以的 */
+int* const p = &a; 
+/* p为指向常量的常量指针，p的指向以及指向的对象都不可以更改，无论是*p = 3，还是p = &b都是错误的 */
+const int* const p = &a;
+```
+
+还有一种形式是`int const * p`，这种形式是表示常量指针，还是指向常量的指针呢？
+
+Effective C++给出的建议是看"*"的位置，当const位于星号左侧时，const修饰的是值，即表示指向常量，而当const位于星号右侧时，const修饰的是指针，即表示常量指针。所以`int const *p`等价于`const int *p`，你想对了吗？（关键看const修饰的是 * p 还是p）。
+
+const有时还会修饰函数的形参或者函数的返回值，都是属于1或2这两种情况。修饰函数形参的用法：
+
+```c++
+void fun(const char a)
+{
+	a = ‘d’; // 错误，因为的值不可以改变
+	cout << a; // OK
+}
+```
+
+还有一个地方要注意一下，若有：
+
+```c++
+void fun1(const char* a)
+{
+	cout << a << endl;
+}
+void fun2(char *a)
+{
+	cout << a << endl;
+}
+```
+
+当实参为const时，比如`const char* msg = "hello"`，此时`fun1(msg)`是可以的，但`fun2(msg)`会报编译错，说是无法将`const char *` 转成`char *` ；而当实参为普通变量时，比如`char* msg = "hello"`，`fun1(msg)`和`fun2(msg)`都是OK的。这是为什么呢？
+
+因为**当const的变量传递给非const的变量会不安全（非const的变量可以修改原来定义为常量的东西了！）**，所以C++限制了这种用法（需用强制类型转换来告诉编译器，编译器才会放行）；而反过来，**当非const的变量传递给const变量时，不存在安全问题**，所以C++编译器总是会放行的。因此，如果在函数体内确实不改变形参a的值，那么采用带`const`的`fun1`的写法会更好，适用性更强。
+
+#### 修饰迭代器
+
+C++的STL中使用迭代器作为接口，它定义了普通的迭代器，如`vector<T>::iterator`，也定义了指向常量的迭代器，如`vector<T>::const_iterator`，初学者可能想当然地认为`const vector<T>::iterator`等价于`vector<T>::const_iterator`，其实不是这样的。
+
++ `const vector<T>::iterator`表示这个迭代器的指向不可以更改，即表示的是常量迭代器，
++ `vector<T>::const_iterator`表示指向常量的迭代器。
+
+```c++
+std::vector<int> vec;
+...
+const std::vector<int>::iterator iter = vec.begin();
+*iter = 10; 	//可以改变iter所指的物
+++ iter;			//错误，iter是const
+std::vector<int>::const_iterator cIter = vec.begin();
+*cIter = 10;	//错误，*cIter是const
+++ cIter;			//可以改变cIter
+```
+
+#### 在类中修饰成员函数
+
+const放在类中成员函数的后面，表示这个成为函数不会修改类的成员变量，比如：
+
+```c++
+class A
+{
+private:
+	int a;
+	double b;
+public:
+	void fun1() const;
+	void fun2();
+};
+```
+
+注意这里的`fun1()`函数后面有一个`const`，表示这个函数不会修改类的成员变量（在它的函数体里面出现任何改变a或b的值的操作，均不能通过编译）；另一方面`fun2()`函数后面没有`const`，表示这个函数 **可能** 修改类的成员变量，注意这里用的词是“可能”，`fun2()`可以修改也可以不修改，但 **为了增强安全性，所以良好的编程风格一般会把不改动成员变量的成员函数修饰为`const`的** 。
+
++ 有一点要切记： **<font color = red>有无const是可以构成成员函数的重载的！</font>**
+
++ **如果非得在const成员函数中进行修改变量，<font color = red>可以利用C++ 的一个与const先关的摇摆场：mutable </font>。mutable 可以释放掉no-static 成员变量的bitwise constness约束。**
+
++ **<font color = red>在const和非const成员函数中避免重复。</font>** 
+
+我觉得这是一个非常重要的内容，有没有加const是构成函数重载的，但通常这种重载的相似度很高，就用书上的例子：
+
+```c++
+class TestBlock
+{
+private:
+	string text;
+public:
+	…
+	const char& operator[](size_t position) const
+	{
+		…
+		return text[position];
+	}
+
+	char& operator[](size_t position)
+	{
+		…
+		return text[position];
+	}
+};
+```
+
+可以看到两个重载函数里面的操作都是一样的，别因此认为可以用ctrl+c，ctrl+v而省事了，如果你要改动其中一个函数体里的内容，另一个就要同步更新，而万一你忘记了更新，后果是非常严重的！
+
+一个好的方法来实现同步—— **<font color = red>在非const的函数中调用const函数</font>** ！这样来修改：
+
+```c++
+char& operator[] (size_t position)	//只调用const op[]
+{
+	return 
+    const_cast<char&>(			 //将op[]返回值的const转换
+    	static_cast<const TextBlock&>(*this)//为*this加上construction
+    	 [position] //调用const op[] 
+    );
+}
+```
 
 
 
