@@ -238,19 +238,61 @@ C++多线程
 
 ## 十一.面向对象程序设计
 
-+ 
+- [OOP：概述](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E4%B8%80-oop%E6%A6%82%E8%BF%B0)
+
+- [定义基类和派生类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E4%BA%8C%E5%AE%9A%E4%B9%89%E5%9F%BA%E7%B1%BB%E4%B8%8E%E6%B4%BE%E7%94%9F%E7%B1%BB)
+
+  + [定义基类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#1%E5%AE%9A%E4%B9%89%E5%9F%BA%E7%B1%BB)
+  + [定义派生类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#2%E5%AE%9A%E4%B9%89%E6%B4%BE%E7%94%9F%E7%B1%BB)
+
+  + [类型转换与继承](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#3%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E4%B8%8E%E7%BB%A7%E6%89%BF)
+
+- [虚函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E4%B8%89%E8%99%9A%E5%87%BD%E6%95%B0)
+
+- [抽象基类](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E5%9B%9B%E6%8A%BD%E8%B1%A1%E5%9F%BA%E7%B1%BB)
+
+- [访问控制与继承](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E4%BA%94%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%BB%A7%E6%89%BF)
+
+- [继承中的类作用域](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E5%85%AD%E7%BB%A7%E6%89%BF%E4%B8%AD%E7%9A%84%E7%B1%BB%E4%BD%9C%E7%94%A8%E5%9F%9F)
+
+- [构造函数与拷贝控制](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E4%B8%83-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E4%B8%8E%E6%8B%B7%E8%B4%9D%E6%8E%A7%E5%88%B6)
+
+  + [虚析构函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#1%E8%99%9A%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0)
+  + [合成拷贝控制与继承](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#2%E5%90%88%E6%88%90%E6%8B%B7%E8%B4%9D%E6%8E%A7%E5%88%B6%E4%B8%8E%E7%BB%A7%E6%89%BF)
+  + [派生类的拷贝控制成员](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#3%E6%B4%BE%E7%94%9F%E7%B1%BB%E7%9A%84%E6%8B%B7%E8%B4%9D%E6%8E%A7%E5%88%B6%E6%88%90%E5%91%98)
+  + [继承的构造函数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#4%E7%BB%A7%E6%89%BF%E7%9A%84%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0)
+
+- [容器与继承](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E5%85%AB%E5%AE%B9%E5%99%A8%E4%B8%8E%E7%BB%A7%E6%89%BF)
+
+- [文本查询程序再探](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Object-Oriented%20Programming#%E4%B9%9D-%E6%96%87%E6%9C%AC%E6%9F%A5%E8%AF%A2%E7%A8%8B%E5%BA%8F%E5%86%8D%E6%8E%A2)
+
+
 
 ## 十二.模板与泛型编程
 
-+ 
-
-
++ [定义模板](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#%E4%B8%80%E5%AE%9A%E4%B9%89%E6%A8%A1%E6%9D%BF)
+  + [函数模板](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#1%E5%87%BD%E6%95%B0%E6%A8%A1%E6%9D%BF)
+  + [类模板](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#2%E7%B1%BB%E6%A8%A1%E6%9D%BF)
+  + [模板参数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#3%E6%A8%A1%E6%9D%BF%E5%8F%82%E6%95%B0)
+  + [成员模板](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#4%E6%88%90%E5%91%98%E6%A8%A1%E6%9D%BF)
+  + [控制实例化](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#5%E6%8E%A7%E5%88%B6%E5%AE%9E%E4%BE%8B%E5%8C%96)
+  + [效率与灵活性](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#6%E6%95%88%E7%8E%87%E4%B8%8E%E7%81%B5%E6%B4%BB%E6%80%A7)
++ [模板实参推断](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#%E4%BA%8C%E6%A8%A1%E6%9D%BF%E5%AE%9E%E5%8F%82%E6%8E%A8%E6%96%AD)
+  + [类型转换与模板类型参数](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#1%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E4%B8%8E%E6%A8%A1%E6%9D%BF%E7%B1%BB%E5%9E%8B%E5%8F%82%E6%95%B0)
+  + [函数模板显示实参](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#2%E5%87%BD%E6%95%B0%E6%A8%A1%E6%9D%BF%E6%98%BE%E5%BC%8F%E5%AE%9E%E5%8F%82)
+  + [尾置返回类型与类型转换](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#3%E5%B0%BE%E7%BD%AE%E8%BF%94%E5%9B%9E%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2)
+  + [函数指针和实参推断](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#4%E5%87%BD%E6%95%B0%E6%8C%87%E9%92%88%E5%92%8C%E5%AE%9E%E5%8F%82%E6%8E%A8%E6%96%AD)
+  + [模板实参推断和引用](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#5%E6%A8%A1%E6%9D%BF%E5%AE%9E%E5%8F%82%E6%8E%A8%E6%96%AD%E5%92%8C%E5%BC%95%E7%94%A8)
+  + [理解std::move](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#6%E7%90%86%E8%A7%A3stdmove)
+  + [转发](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#7%E8%BD%AC%E5%8F%91)
++ [重载与模板](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#%E4%B8%89%E9%87%8D%E8%BD%BD%E4%B8%8E%E6%A8%A1%E6%9D%BF)
++ [可变参数模板](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#%E5%9B%9B%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0%E6%A8%A1%E6%9D%BF)
+  + [编写可半参数函数模板](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#1-%E7%BC%96%E5%86%99%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0%E5%87%BD%E6%95%B0%E6%A8%A1%E6%9D%BF)
+  + [包扩展](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#2-%E5%8C%85%E6%89%A9%E5%B1%95)
+  + [转发参数包](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#3%E8%BD%AC%E5%8F%91%E5%8F%82%E6%95%B0%E5%8C%85)
++ [模板特例化](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Templates%20AND%20Generic%20Programming#%E4%BA%94-%E6%A8%A1%E6%9D%BF%E7%89%B9%E4%BE%8B%E5%8C%96)
 
 # 重点与难点整理
-
-
-
-<!-- GFM-TOC -->
 
 [一.引用与指针](#一引用与指针)
 
@@ -259,10 +301,6 @@ C++多线程
 [三.static](#static)
 
 [四.this](四.this)
-
-
-
-<!-- GFM-TOC -->
 
 ---
 
