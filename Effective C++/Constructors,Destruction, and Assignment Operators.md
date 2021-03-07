@@ -29,11 +29,11 @@ EmptyClass obj1;
 EmptyClass obj2;
 ```
 
-即便是空类，也要能识别obj1和obj2的不同，所以空类仍然要占字节数，**一般占一个字节**。
+即便是空类，也要能识别obj1和obj2的不同，所以空类仍然要占字节数， **一般占一个字节**。
 
 > "To ensure that the addresses of two different objects will be different." 就用那1byte来在内存中占用不同地址了。
 
-还有一个针对空类的问题是**<font color = red>"一个空类里面有什么"</font>**，就是想问编译器为这个空类自动生成了哪些成员函数。
+还有一个针对空类的问题是 **<font color = red>"一个空类里面有什么"</font>** ，就是想问编译器为这个空类自动生成了哪些成员函数。
 很容易想到的是生成了默认的构造函数和析构函数，事实上还有拷贝构造函数和赋值运算符，所以，总共生成了四个成员函数。具体地说，就是你表面上写了 Class EmptyClass{}；但实际编译器为你加了四个成员函数，所以看起来像这样：
 
 ```c++
@@ -53,9 +53,9 @@ EmptyClass& operator= (const EmptyClass& obj){ }
 
 赋值运算符要返回自身`*this`，是因为考虑到可以出现连等的情况，比如`obj1 = obj2 = obj3`，另外，这里都使用了自身类的引用，即`EmptyClass&`，这里的引用是必须要加的，这是因为：
 
-+ 引用修饰形参时，可以避免实参对形参的拷贝，一方面可以节省空间和时间资源，**更为重要的是<font color = red>若实参对形参拷贝了，又会调用一次拷贝构造函数，这样拷贝构造函数就会一遍又一遍的被调用，造成无穷递归。</font>**
++ 引用修饰形参时，可以避免实参对形参的拷贝，一方面可以节省空间和时间资源， **更为重要的是<font color = red>若实参对形参拷贝了，又会调用一次拷贝构造函数，这样拷贝构造函数就会一遍又一遍的被调用，造成无穷递归。</font>**
 
-+ 引用修饰返回值时，可以使返回的对象原地修改。比如`(a=b) ++`，这样**返回的a对象还可以进行自增操作**，如果不加引用，则因为生成的是原对象的拷贝，所以这样的自增操作并不使a本体自增。
++ 引用修饰返回值时，可以使返回的对象原地修改。比如`(a=b) ++`，这样 **返回的a对象还可以进行自增操作** ，如果不加引用，则因为生成的是原对象的拷贝，所以这样的自增操作并不使a本体自增。
 
 本书中还讲到了一个特殊的情况，就是成员变量是const的，或者是引用，比如：
 
@@ -96,7 +96,7 @@ SampleClass obj1;
 SampleClass obj2(obj1);
 ```
 
-却是可以编译通过的，这是因为**编译器可以生成默认的拷贝构造函数。 这种生成方式并不会破坏const和reference的特性。**
+却是可以编译通过的，这是因为 **编译器可以生成默认的拷贝构造函数。 这种生成方式并不会破坏const和reference的特性。**
 
 > 最后还有一种情况：如果某个base class将copy assignment操作符声明为private，编译器将拒绝为 derived classes生成一个copy assignment操作符。
 
@@ -210,11 +210,11 @@ delete p1;
 delete p2;
 ```
 
-就**会出现内存的泄露**，为什么会这样？
+就 **会出现内存的泄露** ，为什么会这样？
 
 **<font color = red>因为Shape没有显式定义析构函数，编译器为我们生成的析构函数不是虚的，这时候delete p1，编译器就简单地析构了基类的部分，派生类的部分就被架空了，造成了内存的泄露。</font>**
 
-解决方法是**基类声明virtual析构函数：**
+解决方法是 **基类声明virtual析构函数：**
 
 ```c++
 class Shape
@@ -231,7 +231,7 @@ public:
 
 那么是怎么""检查"指针实际指向的对象呢？
 
-**C++为每个含有virtual关键字的类中提供了一个虚表指针vptr，它指向一个由函数指针构成的数组，称为虚表。**程序在运行时会维护类对象中的vptr，比如：
+**C++为每个含有virtual关键字的类中提供了一个虚表指针vptr，它指向一个由函数指针构成的数组，称为虚表。** 程序在运行时会维护类对象中的vptr，比如：
 
 ```c++
 Shape *p1 = new Square;
@@ -239,11 +239,11 @@ Shape *p1 = new Square;
 
 vptr就会指向Square的print()函数。
 
-但不是所有析构函数都需要加上virtual，因为一旦出现了virtual，编译器就会生成vptr，**这个vptr本身是要占空间的，对于一个并不大的类而言，vptr所占空间（32位机上是4字节，64位机上是8字节）的百分比还是很可观的。**所以virtual要相时而加，出现多态继承关系时一定要加上，而非基类或者不用于多态的基类（比如条款6说的Uncopyable）就不要加。
+但不是所有析构函数都需要加上virtual，因为一旦出现了virtual，编译器就会生成vptr， **这个vptr本身是要占空间的，对于一个并不大的类而言，vptr所占空间（32位机上是4字节，64位机上是8字节）的百分比还是很可观的。** 所以virtual要相时而加，出现多态继承关系时一定要加上，而非基类或者不用于多态的基类（比如条款6说的Uncopyable）就不要加。
 
-另外，**所有的STL，包括string，vector等等，在设计时就没把它们当作基类，所以它们的析构函数都不是虚函数，因此试图定义一个类去继承STL是非常危险的！**
+另外， **所有的STL，包括string，vector等等，在设计时就没把它们当作基类，所以它们的析构函数都不是虚函数，因此试图定义一个类去继承STL是非常危险的！**
 
-本例中Shape类已经是抽象类了，使不想生成对象的类成为抽象类，这是一个很好的技术实现方案，但万一有时候难以找到一个纯虚函数，怎么办呢？自己强行加一个像print()一样的函数固然是可以的，但不自然，**一个好的方法是<font color = red>把析构函数变成纯虚函数</font>，像这样：**
+本例中Shape类已经是抽象类了，使不想生成对象的类成为抽象类，这是一个很好的技术实现方案，但万一有时候难以找到一个纯虚函数，怎么办呢？自己强行加一个像print()一样的函数固然是可以的，但不自然， **一个好的方法是<font color = red>把析构函数变成纯虚函数</font>，像这样：**
 
 ```c++
 class Shape
@@ -365,11 +365,11 @@ int main()
 
 如果按照多态的思路，行为的执行者应该是派生类的`VirtualFunction()`，也就是输出的是`In the Derived Class`，然而实际跑一下这个程序，运行结果却是`In the Base Class `！
 
-一种很好的理解方法就是，**派生类部分必须在基类部分构造完全之后才会去构造，因此在虚表中尚未注册派生类的`VirtualFunction()`，这时只能调用基类的`VirtualFunction()`**。对于析构函数，同样是如此，派生类部分先析构，这时基类中的虚函数将无法定位到派生类，只能调用基类自身的函数。书上指出**<font color = red>"在base class构造期间，virtual函数不是virtual函数"</font>**。
+一种很好的理解方法就是， **派生类部分必须在基类部分构造完全之后才会去构造，因此在虚表中尚未注册派生类的`VirtualFunction()`，这时只能调用基类的`VirtualFunction()`** 。对于析构函数，同样是如此，派生类部分先析构，这时基类中的虚函数将无法定位到派生类，只能调用基类自身的函数。书上指出**<font color = red>"在base class构造期间，virtual函数不是virtual函数"</font>**。
 
-这样的结果会使我们感到困惑，与多态法则的效果不一致，**所以本书作者强调"绝不在构造和析构函数中调用virtual函数"**。
+这样的结果会使我们感到困惑，与多态法则的效果不一致， **所以本书作者强调"绝不在构造和析构函数中调用virtual函数"**。
 
-**当实例化一个派生类对象时，首先进行基类部分的构造，然后再进行派生类部分的构造。**即创建Derive对象时，会先调用Base的构造函数，再调用Derive的构造函数。当在构造基类部分时，派生类还没被完全创建，从某种意义上讲此时它只是个基类对象。即当Base::Base()执行时Derive对象还没被完全创建，此时它被当成一个Base对象，而不是Derive对象，因此Foo绑定的是Base的Foo。
+**当实例化一个派生类对象时，首先进行基类部分的构造，然后再进行派生类部分的构造。** 即创建Derive对象时，会先调用Base的构造函数，再调用Derive的构造函数。当在构造基类部分时，派生类还没被完全创建，从某种意义上讲此时它只是个基类对象。即当Base::Base()执行时Derive对象还没被完全创建，此时它被当成一个Base对象，而不是Derive对象，因此Foo绑定的是Base的Foo。
 
 在构造函数中，所有基类构造函数总是在继承类构造函数执行之前被调用，而继承类对象将在构造函数执行完之后被完整创建。如果在构造函数中调用一个虚函数，则会不会发生动态绑定呢？答案是**调用的是这个虚函数的本地版本。**在构造函数中，基类构造函数已经被执行完成，如果在这个时候通过基类引用或指针调用一个虚函数，会把对象视为base class对象，因为这个时候，继承类对象还尚未被初始化完成，所以面对它们，最安全的做法就是视它们不存在。
 
@@ -393,8 +393,258 @@ int main()
 
 ### 11.在operator = 中处理"自我赋值"
 
++ **确保当对象自我赋值时`operator=`有良好的行为，其中技术包括比较“来源对象”和“目标对象”的地址、精心周到的语句顺序、以及`copy-and-swap`；**
+
++ **确定任何函数如果操作一个以上的对象，而其中多个对象是同一个对象时，其行为仍然正确**
+
+直观的operator=是这样定义的：
+
+```c++
+class SampleClass
+{
+private:
+         int a;
+         double b;
+         float* p;
+public:
+         SampleClass& operator= (const SampleClass& s)
+         {
+                   a = s.a;
+                   b = s.b;
+                   p = s.p;
+                   return *this;
+         }
+};
+```
+
+如果定义了一个WebBrower的类，里面执行对浏览器的清理工作，包括清空缓存，清除历史记录和清除Cookies，现在需要将这三个函数打包成一个函数，这个函数执行所有的清理工作，那是将这个清理函数放在类内呢，还是把他放在类外呢？
+
+如果放在类内，那就像这样：
+
+```c++
+class SampleClass
+{
+private:
+         int a;
+         double b;
+         float* p;
+public:
+         SampleClass& operator= (const SampleClass& s)
+         {
+                   a = s.a;
+                   b = s.b;
+                   delete p;
+                   p = new float(*s.p);
+                   return *this;
+         }
+};
+```
+
+大致思路就是 **删除指针所指向的旧内容，而后再用这个指针指向一块新的空间，空间的内容填充s.p所指向的内容。** 但有两件事会导致这段代码崩溃，其一就是本条款所说的"自我赋值"。读者不妨想想看，如果这样：
+
+```c++
+SampleClass obj;
+obj = obj;
+```
+
+所发生的事情。在赋值语句执行时，检测到`obj.p`已经有指向了，此时会释放掉`obj.p`所指向的空间内容，但紧接着下一句话就是：
+
+```c++
+p = new float(*s.p);
+```
+
+注意`*s.p`会导致程序崩溃，因为此时`s.p`也就是`obj.p`，对其取值`obj.p`（根据优先级，这相当于(obj.p)），`obj.p`已经在前一句话被释放掉了，所以这样的操作会有bug。
+
+解决自我赋值只要一句话：
+
+```c++
+class SampleClass
+{
+private:
+         int a;
+         double b;
+         float* p;
+public:
+         SampleClass& operator= (const SampleClass& s)
+         {
+                   if(this == &s) return *this; // 解决自我赋值的一句话
+                   a = s.a;
+                   b = s.b;
+                   delete p;
+                   p = new float(*s.p);
+                   return *this;
+         }
+};
+```
+
+但是，如下程序
+
+```c++
+class SampleClass
+{
+private:
+         int a;
+         double b;
+         float* p;
+public:
+         SampleClass& operator= (const SampleClass& s)
+         {
+                   if(*this == s) return *this; // 注意条件判断的不同，这样写有问题！
+                   a = s.a;
+                   b = s.b;
+                   delete p;
+                   p = new float(*s.p);
+                   return *this;
+         }
+};
+```
+
+这样是不对的，因为`==`经常是用于对象内每一个成员变量是否相同的判断，而不是地址是否重叠的判断。所以用`this == &s`才能 **<font color = red>从地址上来捕捉到是否真的是自我赋值。</font>**
+
+这样做确实能解决上面所说的第一问题：自我赋值。事实上还可能出现另一个问题导致代码崩溃，试想， **如果`p = new float(*s.p)`不能正常分配空间怎么办，突然抛出了异常怎么办，这将导致原有空间的内容被释放，但新的内容又不能正常填充** 。有没有一个好的方法，在出现异常时，还能保持原有的内容不变呢？（可以提升程序的健壮性）
+
+这有两种思路，书上先给出了这样的
+
+```c++
+SampleClass& operator= (const SampleClass& s)
+{
+         if(this == &s) return *this; //可以删掉
+         a = s.a;
+         b = s.b;
+         float* tmp = p; // 先保存了旧的指针
+         p = new float(*s.p); // 再申请新的空间，如果申请失败，p仍然指向原有的地址空间
+         delete tmp; // 能走到这里，说明申请空间是成功的，这时可以删掉旧的内容了
+         return *this;
+}
+```
+
+大致的思路是保存好旧的，再试着申请新的，若申请有问题，旧的还能保存。这里可以删掉第一句话，因为"让operator具备异常安全往往自动获得自我赋值安全的回报"。
+
+还有一种思路，就是 **先用临时的指针申请新的空间并填充内容，没有问题后，再释放到本地指针所指向的空间，最后用本地指针指向这个临时指针** ，像这样：
+
+```c++
+SampleClass& operator= (const SampleClass& s)
+{
+         if(this == &s) return *this; //可以删掉
+         a = s.a;
+         b = s.b;
+         float* tmp = new float(*s.p); // 先使用临时指针申请空间并填充内容
+         delete p; // 若能走到这一步，说明申请空间成功，就可以释放掉本地指针所指向的空间
+         p = tmp; // 将本地指针指向临时指针
+         return *this;
+}
+```
+
+上述两种方法都是可行，但还要注意拷贝构造函数里面的代码与这段代码的重复性，试想一下， **如果此时对类增加一个私有的指针变量，这里面的代码，还有拷贝构造函数里面类似的代码，都需要更新** ，有没有可以一劳永逸的办法？
+
+本书给出了最终的解决方案：
+
+```c++
+SampleClass& operator= (const SampleClass& s)
+{
+         SampleClass tmp(s);
+         swap(*this, tmp);
+         return *this;
+}
+```
+
+**这样把负担都交给了拷贝构造函数，使得代码的一致性能到保障。** 如果拷贝构造函数中出了问题，比如不能申请空间了，下面的swap函数就不会执行到，达到了保持本地变量不变的目的。
+
+还有一种方式
+
+```c++
+SampleClass& operator= (const SampleClass s)
+ {
+          swap(*this, s);
+          return *this;
+ }
+```
+
+**<font color = red>注意这里去掉了形参的引用，将申请临时变量的任务放在形参上了，可以达到优化代码的作用。但作者比较忧虑</font>**
+
 
 
 ---
 
 ### 12.复制对象时勿忘其每一个成分
+
+这句话包含两部分的意思：
+
++ **第一部分是要考虑到所有成员变量，特别是后加入的，相应的拷贝构造函数和赋值运算符要及时更新**
++ **第二部分是在存在继承时，不要遗忘基类部分的复制。**
+
+先看第一部分的意思，举个例子：
+
+```c++
+class SampleClass
+{
+private:
+	int a;
+public:
+	SampleClass(const SampleClass& s):a(s.a)
+	{}
+};
+```
+
+这里只举了一个拷贝构造函数的例子，赋值运算符与之类似，如果这个时候又加了一个成员变量，比如double b， **拷贝构造函数和赋值运算符就要相应地更新** （构造函数当然也要更新，只是构造函数一般不会被忘记，而拷贝构造函数和赋值运算符却常常被遗忘）。像这样：
+
+```c++
+class SampleClass
+{
+private:
+	int a;
+	double d;
+public:
+	SampleClass(const SampleClass& s):a(s.a),d(s.d)
+	{}
+};
+```
+
+再看第二部分的意思，当存在继承关系时：
+
+```c++
+class Derived: public SampleClass
+{
+private:
+	int derivedVar;
+public:
+	Derived(const Derived& d):derivedVar(d.derivedVar){}
+};
+```
+
+像这样，很容易就会漏掉基类的部分，导致基类部分没有得到正常的拷贝，应该修改为如下：
+
+```c++
+class Derived: public SampleClass
+{
+private:
+	int derivedVar;
+public:
+	Derived(const Derived& d):SampleClass(d), derivedVar(d.derivedVar){}
+};
+```
+
+对于赋值运算符的重载，应该写成这样：
+
+```c++
+Derived& operator=(const Derived& d)
+{
+         SampleClass::operator=(d);
+         derivedVar = d.derivedVar;
+         return *this;
+}
+```
+
+可以看到，赋值运算符重载与拷贝构造函数的代码具有很高的相似性，但书上说 **"不要尝试以某个copying函数实现另一个copying函数"** 。我觉得这里有争议，上一个条款中，书上已经做到了在赋值运算符中调用拷贝构造函数了，像这样：
+
+```c++
+Derived& operator=(const Derived& d)
+{
+         Derived tmp(d);
+         swap(*this, tmp);
+         return *this;
+}
+```
+
+**<font color = red>这就是一个在赋值运算符内调用拷贝构造函数的例子，也许在有些情况下，它的效率看上去不那么高，但却为代码的一致性提供了很好的保障，也能有效提供异常安全性。</font>**
+
