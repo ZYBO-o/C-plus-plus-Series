@@ -544,17 +544,165 @@ Address = 0x7ffeeb192aa8 is unlocked
 
 ### 15.在资源管理类中提供原始资源访问
 
++ **一些应用程序接口往往要求访问到原始资源，所以每一个RAII类都应该提供一个“取得所管理之资源”的方法**
+
++ **对原始资源的访问可能经由显式或隐式转换。一般而言显式转换比较安全**
+
+这个MySharedPtr已经可以进行资源管理了，当资源的生命周期结束后，可以自动将之删除。但对于使用者来说，还是会遇到一些问题，比如：
+
+```c++
+void PrintIntPointerValue(int* p)
+{
+    cout << *p << endl;
+}
+
+int main()
+{
+    MySharedPtr<int> ptr(new int(2));
+    PrintIntPointerValue(ptr);
+}
+```
+
+因为`PrintIntPointerValue`函数需要原始指针，但MySharedPtr类中并没有提供这一个接口，所以如果像上面程序一样强行使用，就会报编译错。
+
+解决的方法其实挺简单的，就是在 **类中添加一个名为`get()`的函数** ，这个函数返回原始指针。也许会有人质疑这种做法，因为这样原始指针的阴影又会浮现出来，它提供了一个让用户可能出错的接口。
+
+但书上有句话说的好：**<font color = red>"一个好的class应是“隐藏了客户不需要看的部分，但备妥客户需要的所有东西"。</font>**
+
+除了`get()`外，也可以使用隐式转换函数：
+
+```c++
+operator T*() const
+{
+     return ptr;
+}
+```
+
+但这种方法往往会使程序陷入漏洞之中，比如：
+
+```c++
+MySharedPtr<int> sharedPtr(new int(3));
+
+int *ordinaryPtr = sharedPtr; 
+// 这样编译会通过，但一旦sharedPtr释放资源后，ordinaryPtr便会成为悬空指针c
+//（ordinaryPtr并会使引用计数加一，也不会参与到资源释放的操作中来）
+```
+
+```c++
+shared_prt<Investment> pInv=(createInvestment());
+dayHeld(pInv.get());
+```
+
+所以一般而言，提供一个`get()`函数是比较好的选择。另外，为了方便访问，还应该重载`*`和`->`操作符，使得MySharedPtr对象的操作与原始指针的操作一样方便，如下所示：
+
+```c++
+T& operator* () const
+{
+    return *ptr;
+}
+
+T* operator-> () const 
+{
+    return ptr;
+}
+
+T* get() const 
+{
+    return ptr;
+}
+```
+
 
 
 ---
 
 ### 16.成对使用new和delete时要采取相同形式
 
++ **如果你在new表达式中使用[]，必须在相应的delete表达式中也使用[]。如果你在new表达式中不使用[]，一定不要在相应的delete表达式中使用[]。**
+
+这个条款比较好理解，就是new有两种形式：
+
+```c++
+int *p = new int(); // 申请一个int资源
+int *p = new int[3]; // 申请连续三块int资源
+
+//而delete也有两种资源：
+delete p; // delete指针所指向的单一资源
+delete [] p; // delete指针所指向的多个连续资源块
+```
+
+那么该各用哪一种形式呢？一个简单又好记的规则就是：
+
+在`new`如果使用了`[]`，那么`delete`也去用`[]`；反之则都不用。一句话，都用或者都不用。
+
+但事实上，如果用错了，编译器不会给任何提示，也没有运行错，这些行为是“未定义的”。这可能会产生严重的后果，因为这会造成内存回收不彻底的bug。
+
+上面是一种直观的形式，如果换成稍稍复杂一些，比如：
+
+```c++
+typedef string AddressLines[4];
+string *pal = new AddressLines;
+```
+
+那么该用`delete pal`还是`delete []pal`呢？
+
+注意这里用了`typedef`，`AddressLines`是相当于`string[4]`，`pal`指向4个连续string内存段的首地址，所以这里应该用`delete[] pal`。
+
+这样看来，与我们之前说的简记规则又矛盾了，因为new的时候并没有出现[]，而delete却有了[]。
+
+书上对此作了解释， **"最好尽量不要对数组形式做typedef动作"** ，应该用C++标准程序库中的类似vector来做，这样就可以避免出错了。
 
 
 ---
 
 ### 17.以独立语句将newed对象置入智能指针
+
+举书上的例子：
+
+```c++
+int GetPriority();
+ void processWidget(shared_ptr<Widget> pw, int priority);
+```
+
+如果这样调用processWidget：
+
+```c++
+processWidget(new Widget(), GetPriority());
+```
+
+注意一下两边的类型，左边是管理者`shared_ptr`类，而右边是被管理者`Widget`类，两边类型不等，编译器会试图执行类型隐式转换，但为了安全起见，`shared_ptr`的构造函数前面有修饰符`explicit`，它不允许发生隐式转换，所以编译器会报错。
+
+但如果这样：
+
+```c++
+processWidget(shared_ptr pw(new Widget), GetPriority());
+```
+
+就可以成功调用构造函数了。
+
+**但这里可能会发生内存泄露，** 不知道读者有没有发现。千万不要认为`GetPriority()`是个配角，它的存在恰好是我们下面要讨论的。
+
+函数参数压栈的顺序与编译器有关，这里的实参到形参的传递过程其实是不确定的，**即`GetPriority()`的调用很可能发生在`new Widget`之后，而在`pw(new Widget)`之前，这样<font color = red>万一`GetPriority`抛出了异常，而`pw`还没有来得及接管`new Widget`，这样就没有可能释放`Widget`资源了</font>** 。也就是说，如果是按这个顺序执行的话：
+
+(1) new Widget
+
+(2) GetPriority() 并将返回值传给priority
+
+(3) pw接管newWidget，而后传给函数形参
+
+就可能出现内存泄露。
+
+那么怎样解决这个问题呢？
+
+答案就是读书笔记的标题了： **以独立语句将new产生的对象置入智能指针（因为“在资源被创建和资源被管理这两个时间点之间有可能发生异常干扰）** 。简言之，就是一条语句不要执行太多的操作，特别是这种内存管理的操作，分成几条独立的语句会安全一些。应该这样：
+
+```c++
+shared_ptr<Widget> pw(new Widget);
+processWidget(pw, GetPriority());
+```
+
+这样不管函数是以怎样的顺序传参，在第一句的时候就保证了资源的成功接管，即使`GetPriority()`发生异常，`shared_ptr`也能及时释放掉资源，从而避免内存泄露。
+
 
 
 
