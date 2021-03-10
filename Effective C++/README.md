@@ -31,9 +31,18 @@
 
 ## 四.设计与声明
 
-
+* [18.让接口容易被正确使用，不易被误用](#13以对象管理资源)
+* [19.设计class犹如设计type]()
+* [20.宁以pass-by-reference-to-const替代pass-by-value]()
+* [21.必须返回对象时，别妄想返回其reference]()
+* [22.将成员变量声明为private]()
+* [23.宁以non-member,non-friend替换member函数]()
+* [24.若所有参数皆需类型转换，请为此采用non-member函数]()
+* [25.考虑写一个不抛异常的swap函数]()
 
 ## 五.实现
+
+
 
 
 
