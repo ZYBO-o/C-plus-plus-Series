@@ -31,14 +31,14 @@
 
 ## 四.设计与声明
 
-* [18.让接口容易被正确使用，不易被误用](#13以对象管理资源)
-* [19.设计class犹如设计type]()
-* [20.宁以pass-by-reference-to-const替代pass-by-value]()
-* [21.必须返回对象时，别妄想返回其reference]()
-* [22.将成员变量声明为private]()
-* [23.宁以non-member,non-friend替换member函数]()
-* [24.若所有参数皆需类型转换，请为此采用non-member函数]()
-* [25.考虑写一个不抛异常的swap函数]()
+* [18.让接口容易被正确使用，不易被误用](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Designs%20and%20Declarations.md#18%E8%AE%A9%E6%8E%A5%E5%8F%A3%E5%AE%B9%E6%98%93%E8%A2%AB%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8%E4%B8%8D%E6%98%93%E8%A2%AB%E8%AF%AF%E7%94%A8)
+* [19.设计class犹如设计type](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Designs%20and%20Declarations.md#19%E8%AE%BE%E8%AE%A1class%E7%8A%B9%E5%A6%82%E8%AE%BE%E8%AE%A1type)
+* [20.宁以pass-by-reference-to-const替代pass-by-value](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Designs%20and%20Declarations.md#20%E5%AE%81%E4%BB%A5pass-by-reference-to-const%E6%9B%BF%E6%8D%A2pass-by-value)
+* [21.必须返回对象时，别妄想返回其reference](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Designs%20and%20Declarations.md#21%E5%BF%85%E9%A1%BB%E8%BF%94%E5%9B%9E%E5%AF%B9%E8%B1%A1%E6%97%B6%E5%88%AB%E5%A6%84%E6%83%B3%E8%BF%94%E5%9B%9E%E5%85%B6reference)
+* [22.将成员变量声明为private](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Designs%20and%20Declarations.md#22%E5%B0%86%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E5%A3%B0%E6%98%8E%E4%B8%BAprivate)
+* [23.宁以non-member,non-friend替换member函数](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Designs%20and%20Declarations.md#23%E5%AE%81%E4%BB%A5non-membernon-friend%E6%9B%BF%E6%8D%A2member%E5%87%BD%E6%95%B0)
+* [24.若所有参数皆需类型转换，请为此采用non-member函数](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Designs%20and%20Declarations.md#24%E8%8B%A5%E6%89%80%E6%9C%89%E5%8F%82%E6%95%B0%E7%9A%86%E9%9C%80%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E8%AF%B7%E4%B8%BA%E6%AD%A4%E9%87%87%E7%94%A8non-member%E5%87%BD%E6%95%B0)
+* [25.考虑写一个不抛异常的swap函数](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Designs%20and%20Declarations.md#25%E8%80%83%E8%99%91%E5%86%99%E4%B8%80%E4%B8%AA%E4%B8%8D%E6%8A%9B%E5%BC%82%E5%B8%B8%E7%9A%84swap%E5%87%BD%E6%95%B0)
 
 ## 五.实现
 
