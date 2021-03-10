@@ -390,17 +390,279 @@ void PrintStudnet(Person *ss);
 
 ### 21.必须返回对象时，别妄想返回其reference
 
++ **绝对不要返回`pointer`或`reference`指向一个`local stack`对象，指向一个`heap-allocated`对象也不是好方法，更不能指向一个`local static`对象（数组），该让编译器复制对象的时候，就让它去复制！返回在函数中创建的变量，不要用引用，就用复制就好。**
 
+当你理解条款20后，很可能出现一种过度使用的情况：只要看到是一个非内置类型，就去使用引用传值。举个书上的例子：
+
+```c++
+class Rational
+{
+private:
+    int numerator;
+    int denominator;
+public:
+    Rational():numerator(0), denominator(1){}
+    friend const Rational& operator* (const Rational& r1, const Rational& r2){…}
+};
+```
+
+`numerator`表示分子，`denominator`表示分母，这里我们需要把注意力放在`operator*`上，不是在它的形参上（用的`const`引用是完全正确的），而是在它的返回值上， **这个带引用的返回值是一个巨大的bug。**
+
+我们可以设想一下实现：
+
+```c++
+friend const Rational& operator* (const Rational& r1, const Rational& r2)
+{
+        Rational temp;
+        temp.numerator = r1.numerator * r2.numerator;
+        temp.denominator = r1.denominator * r2.denominator;
+        return temp;
+}
+```
+
+>  这是一种最容易想到的实现方式，在栈上创建对象temp，分子、分母分别相乘后，将之返回。
+
+但仔细再想想，调用函数真的能收到这个temp吗？**它是在`operator *` 函数调用时的栈上产生的，当这个函数调用结束后，栈上的temp也会被pop掉，换言之，temp的生命周期仅存在于`operator *`  函数内，离开这个函数，返回的引用将指向一个已经不在的对象！**
+
+对此，VS编译器已经给出了warning，如下：
+
+```SH
+“warning C4172: returning address of local variable or temporary”
+```
+
+千万不能忽略它。
+
+那既然栈上创建对象不行，还可以在堆上创建嘛（new出来的都是在堆上创建的），于是我们有：
+
+```c++
+friend const Rational& operator* (const Rational& r1, const Rational& r2)
+{
+    Rational *temp = new Rational();
+    temp->numerator = r1.numerator * r2.numerator;
+    temp->denominator = r1.denominator * r2.denominator;
+    return *temp;
+}
+```
+
+这下VS编译器没有warning了，之前在资源管理那部分说过， **<font color = red>new和delete要配对</font>** ，这里只有new，那delete了？delete肯定不能在这个函数里面做， **只能放在外面，这样new和delete实际位于两个不同的模块中了，程序员很容易忘记回收，而且给维护也带来困难，所以这绝对不是一种好的解决方案。** 书上举了一个例子，比如：
+
+```c++
+Rational w, x, y, z;
+w = x * y * z;
+```
+
+> 连乘操作会有两次`new`的过程，我们 **很难取得`operator*`返回的`reference`背后隐藏的那个指针。**
+>
+> 当然，如果把`new`换成`auto_ptr`或者是`shared_ptr`，这种资源泄露的问题就可以避免。
+
+栈上创建的临时对象不能传入主调模块，堆上创建的对象就要考虑资源管理的难题，还有其他解决方法吗？
+
+我们还有static对象可以用，static对象位于全局静态区，它的生命周期与这个程序的生命周期是相同的，所以不用担心它会像栈对象那样很快消失掉，也不用担心它会像堆对象那样有资源泄露的危险。可以像这样写：
+
+```c++
+friend const Rational& operator* (const Rational& r1, const Rational& r2)
+{
+    static Rational temp;
+    temp.numerator = r1.numerator * r2.numerator;
+    temp.denominator = r1.denominator * r2.denominator;
+    return temp;
+}
+```
+
+这样写编译器同样不会报错，但考虑一下这样的式子：
+
+```c++
+Rational r1, r2, r3;
+if(r1 * r2 == r1 * r3)
+{
+  …
+}
+```
+
+if条件恒为真，这就是静态对象做的！ 因为所有对象共享这个静态对象，在执行`r1 * r2`时，temp的值为t1，但执行`r1 * r3`之后，temp的值统一都变成t2了。 **它在类中只有一份，明白这个原因后就不难理解了。**
+
+既然一个static对象不行，那弄一个static数组？把r1 * r2的值放在static数组的一个元素里，而把r1 * r3放在static数组的另一个元素里？仔细想想就知道这个想法是多么的天马行空。
+
+**一个必须返回新对象的正确写法是去掉引用，就这么简单！**
+
+```c++
+friend const Rational operator* (const Rational& r1, const Rational& r2)
+{
+    Rational temp;
+    temp.numerator = r1.numerator * r2.numerator;
+    temp.denominator = r1.denominator * r2.denominator;
+    return temp;
+}
+```
+
+该让编译器复制的时候就要放手去复制。
 
 ---
 
 ### 22.将成员变量声明为private
 
++ **切记将成员变量声明为private，这可赋予客户访问数据的一致性、可细微划分访问控制、允诺约束条件获得保证，并提供class作者以充分的实现弹性**
+
++ **protected并不比public更具封装性**
+
+```c++
+class Clothes
+{
+public:
+    int price;
+    string name;
+};
+```
+
+假设有一个衣服的类，里面的成员变量用来描述它的价格和衣服名。将之设为public的话，类外可以直接接触到price成员变量。这样很危险，因为客户端可以直接修改price了，卖衣服的商家就会不开心了。而将price设置成private，像这样：
+
+```c++
+class Clothes
+{
+private:
+    int price;
+    string name;
+public:
+    int GetPrice()
+    {
+        return price;
+    }
+};
+```
+
+price的访问需要经由GetPrice()的成员函数才能进行，类外客户端不能直接对price进行操作。从这里就可以看到将price设为private的三个好处：
+
++ **可以对访问进行控制** ，对于一个变量，可以设置它为可读可写（同时提供get和set函数），亦可设置为只读（只提供get函数），甚至可以设置成为只写（只提供set函数）。
++ **语法一致性。** 很多时候程序员在编程的时候都在想到底是Object.price呢，还是Object.price()呢？如果只能通过成员函数访问，就知道后面应该加上小括号了。
++ **面向对象的三大基石之一——封装** 。商家修改了这个类，比如在商店门口公布了打折信息，那么只要在类中这样做：
+
+```c++
+int GetPrice()
+ {
+     return price * 0.9;
+ }
+```
+
+客户端完全不需要作任何修改。封装可以更直观地打一个比方，有两个同学A和B，他们都约自己的朋友去爬山，A约了10个人，而B只约了1个人，不凑巧天下雨了，爬山的计划只能暂时取消，需要通知自己的朋友，这时你想想，是A容易通知呢，还是B容易通知呢？
+
+**是的，很明显应该是B好解决问题一些。为什么呢？因为与它发生关系（爬山）的人最少，所以处理起来很方便（一句话，接触越少越容易维护）。这唯一的1个人就好比是成员函数，如果功能变更，只要修改这个成员函数就可以了，而不必修改类外任何代码。**
+
+好了，我们总结一下为什么要将成员变量声明为private而不是public的原因：
+
++ **<font color = red>能够提供语法一致性，写代码的时候能够马上区分要不要加函数括号；</font>**
+
++ **<font color = red>提供更好的访问控制，只读、只写还是可读可写，都容易控制；</font>**
+
++ **<font color = red>封装，减少与外界接触的机会，方便修改和维护。</font>**
+
+现在回答下一个问题：为什么protected不行？
+
+如果不存在继承关系，protected的作用与private等同，除了本类之外，其他类或者类外都不能访问， **但如果存在继承关系时，protected标识的成员变量，在它的子类中仍可以直接访问，所以封装性就会受到冲击。这时如果更改父类的功能，相应子类涉及到的代码也要修改，这就麻烦了。** 而如果使用private标识，则根据规则，所有private标识的变量或者函数根本不被继承的，这样就可以保护父类的封装性了，仍可以在子类中通过父类的成员函数进行访问。
+
+书上说了这样一句话： **"从封装的角度观之，其实只有两种访问权限：private（提供封装）和其他（不提供封装）。"**
 
 
 ---
 
 ### 23.宁以non-member,non-friend替换member函数
+
++ **宁可拿non-member non-friend函数替换member函数，这样可以增加封装性、包裹弹性和机能扩充性**
+
+本条款还是讨论封装的问题，举书上的例子：
+
+```c++
+class WebBrower
+{
+public:
+    void ClearCach();
+    void ClearHistory();
+    void RemoveCookies();
+};
+```
+
+定义了一个WebBrower的类，里面执行对浏览器的清理工作，包括清空缓存，清除历史记录和清除Cookies，现在需要将这三个函数打包成一个函数，这个函数执行所有的清理工作，那是将这个清理函数放在类内呢，还是把他放在类外呢？
+
+如果放在类内，那就像这样：
+
+```c++
+class WebBrower
+{
+    …
+    void ClearEverything()
+    {
+        ClearCach();
+        ClearHistory();
+        RemoveCookies();
+    }
+    …
+};
+```
+
+如果放在类外，那就像这样：
+
+```c++
+void ClearWebBrowser(WebBrower& w)
+{
+    w.ClearCach();
+    w.ClearHistory();
+    w.RemoveCookies();
+}
+```
+
+**根据面向对象守则的要求，数据以及操作数据的函数应该捆绑在一起，都放在类中，这意味着把它放在类内会比较好。<font color = red>但从封装性的角度而言，它却放在类外好</font>**，为什么？
+
+为了区分开，我们把在类内的总清除函数称之为ClearEverything，而把类外的总清除函数称之为ClearWebBrower。
+
+ClearEverything对封装性的冲击更大，**因为它位于类内，这意味着它除了访问这三个公有函数外，还可以访问到类内的私有成员，是的，你也许会说现在这个函数里面只有三句话，但随着功能的扩充，随着程序员的更替，这个函数的内容很可能会逐渐“丰富”起来。而越“丰富”说明封装性就会越差，一旦功能发生变更，改动的地方就会很大。**
+
+再回过头来看看类外的实现，**在ClearWebBrowser()里面，是通过传入WebBrower的形参对象来实现对类内公有函数的访问的，在这个函数里面是绝对不会访问到私有成员变量（编译器会为你严格把关）。因此，ClearWebBrowser的封装性优于类内的ClearEverything。**
+
+但这里有个地方需要注意，ClearWebBrower要是类的非友元函数，上面的叙述才有意义，因为 **<font color = red>类的友元函数与类内成员函数对封装性的冲击程度是相当的。</font>**
+
+看到这里，你也许会争辩， **把这个总清除的功能函数放在类外，就会割离与类内的关联，逻辑上看，这个函数就是类内函数的组合，放在类外会降低类的内聚性。**
+
+为此，书上提供了命名空间的解决方案，事实上，这个方案也是C++标准程序库的组织方式，好好学习这种用法很有必要！像这样：
+
+```c++
+namespace WebBrowserStuff
+{
+    …
+    class WebBrowser();
+    void ClearWebBrowser(WebBrowser& w);
+    …
+}
+```
+
+**namespace与class不同，前者可以跨越多个源码文件，而后者不能。通过命名空间的捆绑，是在封装和内聚之间非常好的平衡。**
+
+更有意思的是，与WebBrower相关的其他功能，比如书签、cookie管理等等，他们与WebBrower紧密相关，但放在单看书签和cookie，两者又是逻辑不同的，喜欢书签管理的用户不一定喜欢cookie管理，这时如果把他们统统放在类内，会显得有些不妥。书上提供了很好的命名空间组织方式，像这样：
+
+```c++
+// 头文件webbrowser.h
+namespace WebBrowserStuff
+{
+    class WebBrowser(); // 核心功能
+    void ClearWebBrowser(WebBrowser& w); // non-member non-friend函数
+}
+
+// 头文件webbrowserbookmarks.h
+namespace WebBrowserStufff
+{
+    …// 与书签相关的函数
+}
+
+// 头文件 webbrowsercookies.h
+namespace WebBrowserStuff
+{
+    …// 与cookie管理相关的函数
+}
+```
+
+将他们放在不同的头文件中，但位于同一个namespace中，是内聚与封装平衡的极佳处理方式。
+
+C++标准库中，容器是std命名空间的重要组成部分，但容器也有好多种，比如vector，set和map等等，如果把它们写在一个头文件中，会很臃肿。 C++把它们放在不同的头文件中，但又位于同一个命名空间里，方便用户使用，比如用户只想用vector，那么只要包含`#include< vector>`就行了，而不必`#include<C++ standardLibrary>`，并且一句`using namespace std`即可不加前缀地使用其内定义的各种名称。
+
+**最后总结一下，本条款强调封装性优先于类的内聚逻辑，这是因为“愈多东西被封装，愈少人可以看到它，而愈少人看到它，我们就有愈大的弹性去改变它，因为我们的改变仅仅影响看到改变的那些人或事物”。采用namespace可以对内聚性进行良好的折中。**
 
 
 
