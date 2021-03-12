@@ -670,11 +670,294 @@ C++标准库中，容器是std命名空间的重要组成部分，但容器也�
 
 ### 24.若所有参数皆需类型转换，请为此采用non-member函数
 
++ **如果你需要为某个函数的所有参数（包括被this指针所指的那个隐喻参数）进行类型转换，那么这个函数必须是个non-member，且为了封装，最好是个non-friend。**
+
+```c++
+class Rational
+{
+private:
+    int numerator;
+    int denominator;
+public:
+    Rational(int n = 0, int d = 1): numerator(n), denominator(d){assert(denominator != 0);}
+    int GetNumerator() const{return numerator;}
+    int GetDenominator() const {return denominator;}
+    const Rational operator* (const Rational& r)
+    {
+        return Rational(numerator * r.numerator, denominator * r.denominator);
+    }
+};
+```
+
+有理数的私有成员是分子numerator和分母denominator，定义了构造函数，注意这个构造函数前面没有加explicit关键字，这意味着允许隐式转换（即标题所说的类型转换）。GetNumerator()和GetDenominator()是用来获取私有成员的值的，下面是我们要重点讲述的乘法运算符的重载。
+
+我们的问题是，用什么方式实现乘法运算符的重载呢？我记得在我初学C++时，书上介绍了两种方法：
+
++ 采用类内成员函数（也就是上面这段程序的写法）
+
++ 采用友元函数，像这样：
+
+  ```c++
+  class Rational
+  {
+  private:
+      int numerator;
+      int denominator;
+  public:
+      Rational(int n = 0, int d = 1): numerator(n), denominator(d){assert(denominator != 0);}
+      int GetNumerator() const{return numerator;}
+      int GetDenominator() const {return denominator;}
+      friend const Rational operator* (const Rational& r1, const Rational& r2);
+  };
+  const Rational operator* (const Rational& r1, const Rational& r2)
+  {
+      return Rational(r1.numerator * r2.numerator, r1.denominator * r2.denominator);
+  }
+  ```
+
+就这两种方法而言，其实 **友元函数的实现方式更优** ，为什么这样说？因为它们对封装性的冲击是相当的，但友元函数支持下面的代码：
+
+```c++
+int main()
+{
+    Rational r1(3, 5);
+    Rational r2(2, 1);
+    r2 = r1 * 2;
+    r2 = 2 * r1;
+    return 0;
+}
+```
+
+成员函数实现却在`r2 = 2 * r1`上通不过编译。将这句话还原成运算符函数的形式，就能看到原因了：
+
+```c++
+r2 = 2.opeator* (r1);
+```
+
+哈哈，这样就知道为什么编译器不允许了，2必须首先转成Rational对象，才能使用它自身的`operator*`，但编译器不允许类型转换成this（隐含的自身指针）的，所以报错。
+
+但对于友元函数实现，我们也将之还原成运算符函数的形式：
+
+```c++
+r2 = operator *(2, r1);
+```
+
+第一个参数会发生隐式转换（因为构造函数前面没有explicit），不会同时进行向this的转换，所以编译器是放行的。
+
+这里插一句，隐式转换的发生过程就像这样：
+
+```c++
+const Rational temp(2);
+r2 = operator*(temp, r1);
+```
+
+综上， **成员函数实现不能支持含隐式转换的交换率，而友元函数实现却可以，故我们认为友元函数实现要优于成员函数实现（程序不支持乘法交换率是难以接受的）。**
+
+解决了这个问题之后，再来思考一下，能否对封装性进行改进，因为条款二十三说了， **<font color = red>宁以non-member，non-friend函数去替换member函数，其实对友元函数形式稍加修改，去掉friend，改用public成员变量来访问函数内的私有成员，就可以实现好的封装</font> **，像这样：
+
+```c++
+const Rational operator* (const Rational& r1, const Rational& r2)
+ {
+     return Rational(r1.GetNumerator() * r2.GetNumerator(), r1.GetDenominator() * r2.GetDenominator());
+ }
+```
+
+在这个函数里面，是不能直接访问到类的私有成员的，因而保证了好的封装性。
+
 
 
 ---
 
 ### 25.考虑写一个不抛异常的swap函数
+
++ **当`std::swap`对你的类型效率不高时，提供一个swap成员函数，这个成员函数不抛出异常，只对内置类型进行操作**
++ **如果提供一个member swap，也该提供一个non-member swap来调用前者，对于普通类，也请特化`std::swap`**
++ **调用swap时，区分是调用自身命名空间的swap还是std的swap，不能乱加std::符号**
++ **为“用户自定义类型”进行`std template`全特化是好的，但千万不要尝试在std内加入某些对std而言全新的东西。**
+
+> 不知道为什么作者给这个条款起这样的名字，因为这样看上去重点是在“不抛出异常”，但事实上作者只是在全文最后一段说了一下不抛异常的原因，大部分段落是在介绍怎样写一个节省资源的swap函数。
+
+你可以试一下，只要包含了头文件iostream，就可以使用swap函数，比如：
+
+```c++
+#include <iostream>
+
+int main()
+{
+    int a = 3;
+    int b = 4;
+    std::swap(a, b);
+}
+```
+
+结果就是a为4，b为3了，也就是说，在std的命名空间内，已经有现成的swap的函数了，这个swap函数很简单，它看起来像这样：
+
+```c++
+template<class T>
+void swap(T& a, T& b)
+{
+    T c = a;
+    a = b;
+    b = c;
+}
+```
+
+这是最常见形式的两数交换了（特别地，当T是整数的时候，还可以使用异或的操作，这不是本条款讨论的重点，所以略过了，但面试题里面很喜欢问这个）。
+
+假设存在一个类Element，类中的元素比较占空间
+
+```c++
+class Element
+{
+private:
+    int a;
+    int b;
+    vector<double> c;
+};
+```
+
+Sample类中的私有成员是Element的指针，有原生指针，大多数情况下都需要自定义析构函数、拷贝构造函数和赋值运算符，像下面一样。
+
+```c++
+class Sample
+{
+private:
+    Element* p;
+public:
+    ~Sample();
+    Sample(const Sample&);
+    Sample& operator= (const Sample&);
+};
+```
+
+在实现`operator=`的时候，有一个很好的实现方法，参见条款十一。大概像这样：
+
+```c++
+Sample& operator= (const Sample& s)
+{
+    if(this != &s)
+    {
+        Sample temp(s);
+        swap(*this, temp);
+    }
+    return *this;
+}
+```
+
+当判断不是自我赋值后，是通过调用拷贝构造函数来创建一个临时的对象（这里可能会有异常，比如不能分配空间等等），如果这个对象因异常没有创建成功，那么下面的swap就不执行，这样不会破坏this的原始值，如果这个对象创建成功了，那么swap一下之后，把临时对象的值换成*this的值，达到了赋值的效果。
+
+上面的解释是条款九的内容，如果不记得了，可以回头翻翻看，本条款的重点在这个swap函数上。  **这里调用的是默认的std里面的swap函数，<font color = red>它会创建一个临时的Sample对象（拷贝构造函数），然后调用两次赋值运算，这就会调回来了</font>，即在swap函数里面调用`operator=`，而之前又是在`operator=`中调用swap函数，这可不行，会造成无穷递归，堆栈会溢出。**
+
+**因此，我们要写一份自己的swap函数，这个函数是将Sample里面的成员进行交换。**
+
+问题又来了，Sample里面存放的是指向Element的指针，那是交换指针好呢，还是逐一交换指针所指向的对象里面的内容好呢？**Element里面的东西挺多的，所以显然还是直接交换指针比较好（本质是交换了Element对象存放的地址）。**
+
+因此，可以定义一个swap的成员函数。像这样：
+
+```c++
+void swap(Sample& s)
+{
+    std::swap(p, s.p);
+}
+Sample& operator= (const Sample& s)
+{
+    if(this != &s)
+    {
+        Sample temp(s);
+        this->swap(s);
+    }
+    return *this;
+}
+```
+
+但这样看上去有点别扭，我们习惯的是像`swap(a, b)`这种形式的swap，如果交给其他程序员使用，他们也希望在类外能够像`swap(SampleObj1, SampleObj2)`那样使用，而不是`SampleObj1.swap(SampleObj2)`。 **为此我们可以在std空间里面定义一个全特化的版本（`std namespace`是不能随便添加东西的，只允许添加类似于swap这样的全特化版本）** ，像这样：
+
+```c++
+namespace std
+{
+	template<>
+	void swap<Sample>(Sample &s1, Sample &s2)
+	{
+    	s1.swap(s2); // 在这里调用类的成员函数
+	}
+}
+```
+
+```c++
+Sample& operator= (const Sample& s)
+{
+    if(this != &s)
+    {
+        Sample temp(s);
+        swap(*this, s); // 顺眼多了，会先去调用特化版本的swap
+    }
+    return *this;
+}
+```
+
+这样，就可以在使用`namespace std`的地方用`swap()`函数交换两个Sample对象了。
+
+下面书上的内容就变难了，因为假设Sample现在是一个模板类，Element也是模板类，即：
+
+```c++
+template <class T>
+class Element
+{…};
+
+template <class T>
+class Sample
+{…};
+```
+
+那应该怎么做呢？
+
+**<font color = red>在模板下特化std的swap是不合法的（这叫做偏特化，编译器不允许在std里面偏特化），只能将之定义在自定义的空间中，</font>** 比如：
+
+```c++
+namespace mysample
+{
+	template <class T>
+	class Element
+	{…};
+
+	template <class T>
+	class Sample
+	{…};
+
+	template <class T>
+	void swap(Sample<T> &s1, Sample<T> &s2)
+	{
+    	s1.swap(s2);
+	}
+}
+```
+
+总结一下，
+
++ 当是 **普通类** 时， **可以将swap的特化版本放在std的namespace中，swap指定函数时会优先调用这个特化版本；**
++ 当是 **模板类** 时， **只能将swap的偏特化版本放在自定义的namespace中。**
+
+好了，问题来了，这时候用`swap(SampleObj1, SampleObj2)`时，调用的是std版本的swap，还是自定义namespace的swap？
+
+事实上， **编译器还是会优先考虑用户定义的特化版本，只有当这个版本不符合调用类型时，才会去调用std的swap。** 但注意此时：
+
+```c++
+template<typename T>
+void doSomething(T& obj1, T& obj2) 
+{
+  using std::swap; //令std::swap在此函数中可用
+  ...
+  swap(obj1,obj2); //为T类型对象调用最佳swap版本
+  ...
+}
+```
+
+当编译器看到对swap的调用时，它们会查找适当的swap并调用之。
+
++ **如果T是Sample并位于命名空间mysample内，编译器会找出mysample内的swap。**
++ **如果没有T专属的swap存在，编译器会使用std内的swap。**
+
+好了，最后一段终于说到了不抛异常的问题， **书上提到的是不要在成员函数的那个swap里抛出异常，因为成员函数的swap往往都是简单私有成员（包括指针）的置换，比如交换两个int值之类，都是交换基本类型的，不需要抛出异常，把抛出异常的任务交给non-member的swap吧。**
 
 
 
