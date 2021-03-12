@@ -42,12 +42,12 @@
 
 ## 五.实现
 
-* [26.尽可能延后变量定义式的出现时间]()
-* [27.尽量少做转型动作]()
-* [28.避免返回handles指向对象内部成分]()
-* [29.为"异常安全"而努力是值得的]()
-* [30.透彻了解inlining的里里外外]()
-* [31.将文件间的编译依存关系降至最低]()
+* [26.尽可能延后变量定义式的出现时间](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Implementations.md#26%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%BB%B6%E5%90%8E%E5%8F%98%E9%87%8F%E5%AE%9A%E4%B9%89%E5%BC%8F%E7%9A%84%E5%87%BA%E7%8E%B0%E6%97%B6%E9%97%B4)
+* [27.尽量少做转型动作](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Implementations.md#27%E5%B0%BD%E9%87%8F%E5%B0%91%E5%81%9A%E8%BD%AC%E5%9E%8B%E5%8A%A8%E4%BD%9C)
+* [28.避免返回handles指向对象内部成分](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Implementations.md#28%E9%81%BF%E5%85%8D%E8%BF%94%E5%9B%9Ehandles%E6%8C%87%E5%90%91%E5%AF%B9%E8%B1%A1%E5%86%85%E9%83%A8%E6%88%90%E5%88%86)
+* [29.为"异常安全"而努力是值得的](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Implementations.md#29%E4%B8%BA%E5%BC%82%E5%B8%B8%E5%AE%89%E5%85%A8%E8%80%8C%E5%8A%AA%E5%8A%9B%E6%98%AF%E5%80%BC%E5%BE%97%E7%9A%84)
+* [30.透彻了解inlining的里里外外](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Implementations.md#30%E9%80%8F%E5%BD%BB%E4%BA%86%E8%A7%A3inlining%E7%9A%84%E9%87%8C%E9%87%8C%E5%A4%96%E5%A4%96)
+* [31.将文件间的编译依存关系降至最低](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Implementations.md#31%E5%B0%86%E6%96%87%E4%BB%B6%E9%97%B4%E7%9A%84%E7%BC%96%E8%AF%91%E4%BE%9D%E5%AD%98%E5%85%B3%E7%B3%BB%E9%99%8D%E8%87%B3%E6%9C%80%E4%BD%8E)
 
 ## 六.继承与面向对象设计
 
