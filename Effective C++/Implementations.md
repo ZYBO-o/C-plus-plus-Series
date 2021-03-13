@@ -294,6 +294,121 @@ int main()
 
 ### 29.为"异常安全"而努力是值得的
 
++ **异常安全函数是指即使发生异常也不会泄漏资源或者允许任何数据结构败坏。这样的函数区分为三种可能的保证：基本型、强烈型、不抛异常型。**
+
++ **强烈保证往往可以通过`copy-and-swap`实现出来，但“强烈保证”并非对所有函数都可以实现或具备现实意义。**
+
++ **异常安全保证通常最高只等于其所调用之各个函数的异常安全保证中的最弱者。**
+
+```c++
+void PrettyMenu::changeBackground(std::istream& imgSrc)
+{
+    lock(&mutex);
+    delete bgImage;
+    ++ imageChanges;
+    bgImage = new Image(imgSrc);
+    unlock(&mutex);
+}
+```
+
+这段代码大致的意思就是改变背景图片，删掉旧的背景图片，记录修改次数，然后创建新的背景图片。考虑到多线程操作，所以这里用了lock和unlock。
+
+但这里会出现问题，因为并不是每次new都会成功的，有可能抛出异常，一旦抛出异常，unlock就没有执行了，这样资源就会一直处于lock状态，而无法继续操作了。另一方面，虽然本次改变背景的操作的失败了，但imageChanges仍然自增了一次，这就不符合程序员设计的初衷了。
+
+有读者就会想，那还不简单，加上`try…catch`块就行了，像这样：
+
+```c++
+void PrettyMenu::changeBackground(std::istream& imgSrc)
+{
+    try
+    {
+        lock(&mutex);
+        delete bgImage;
+        bgImage = new Image(imgSrc);
+        ++ imageChanges;
+        unlock(&mutex);
+    }
+    catch (Exception* e)
+    {
+        unlock(&mutex);
+    }
+}
+```
+
+在catch里面写上unlock函数，另外，调换imageChanges的位置，在new之后再对齐自增。这样做固然可以，但回想一下， **我们在条款十三和条款十四做了资源管理类，让类的析构函数自动替我们完成这个操作** ，不是会更好吗？像这样：
+
+```c++
+class PrettyMenu
+{
+    …
+    shared_ptr<Image> bgImage;
+    …
+}
+void PrettyMenu::changeBackground(std::istream& imgSrc)
+{
+    Lock m1(&mutex);
+    bgImage.reset(new Image(imgSrc));
+    ++ imageChanges;
+}
+```
+
+这样，即使抛出了异常，锁资源还有imageChanges都保证是异常发生之前的状态。
+
+现在上升到理论的高度，异常安全性要做到：
+
++ **不泄漏任何资源**
++ **不允许数据败坏**
+
+带异常安全性的函数会提供三个保证之一：
+
++ **<font color = red>基本承诺：</font>如果异常被抛出，程序内的任何事物仍然保持在有效状态下。没有任何对象或者数据结构会因此被破坏。比如上例中本次更换背景图失败，不会导致相关的数据发生破坏。**
++ **<font color = red>强烈保证：</font>在基本承诺的基础上，保证成功就是完全成功，失败也能回到之前的状态，不存在介于成功或失败之间的状态。**
++ **<font color = red>不抛出异常：</font>承诺这个代码在任何情况下都不会抛出异常，但这只适用于简单的语句。**
+
+强烈保证有一种实现方法，那就是`copy and swap`。原则就是： **在修改这个对象之前，先创建它的一个副本，然后对这个副本进行操作，如果操作发生异常，那么异常只发生在这个副本之上，并不会影响对象本身，如果操作没有发生异常，再在最后进行一次swap。**
+
+```c++
+struct PMImpl {
+  	std::tr1::shared_ptr<Image>bgImage;
+  	int imageChanges;
+};
+
+class PreetyMenu {
+  	...
+private:
+  	Mutex mutex;
+  	std::tr1::shared_ptr<PMImpl>pIpml;
+};
+
+void PrettyMenu::changeBackground(std::istream& imgSrc)
+{
+  	using std::swap;
+    Lock m1(&mutex);
+   	//弄一个临时的tempBgImage
+    //对tempBgImage进行操作
+  	std::tr1::shared_ptr<PMImpl> pNew(new PMImpl(*pImpl));
+  	pNew->bgImage.reset(new Image(imgSrc));//修改副本
+  	++pNew->imageChanges;
+    swap(pImpl, pNew);
+}
+```
+
+`copy-and-swap`策略关键在于“修改对象数据的副本，然后在一个不抛异常的函数中将修改后的数据和原件置换”。它确实提供了强异常安全保障，但代价是时间和空间，因为必须为每一个即将被改动的对象造出副本。另外，这种强异常安全保障，也会在下面的情况下遇到麻烦：
+
+```c++
+void someFunc()
+ {
+ 		 ... //对local状态做一份副本
+     f1();
+     f2();
+     ... //将修改后的状态置换过来
+ }
+```
+
+f1()和f2()都是强异常安全的，但万一f1()没有抛异常，但f2()抛了异常呢？是的， **数据会回到f2()执行之前的状态，但程序员可能想要的是数据回复到f1()执行之前。** 要解决这个问题就需要将f1与f2内容进行融合，确定都没有问题了，才进行一次大的swap，这样的代价都是需要改变函数的结构，破坏了函数的模块性。 **如果不想这么做，只能放弃这个copy-and-swap方法，将强异常安全保障回退成基本保障。**
+
+类似于木桶效应，代码是强异常安全的，还是基本异常安全的，还是没有异常安全，取决于最低层次的那个模块。换言之，哪怕只有一个地方没有考虑到异常安全，整个代码都不是异常安全的。
+
 
 
 ---
@@ -347,6 +462,386 @@ void Person::setAge(const int o_age)
 ---
 
 ### 31.将文件间的编译依存关系降至最低
+
++ 支持"编译依存性最小化"的一般构想是：相依于声明式，不要相依于定义式，基于此构想的两个手段是Handler classes和Interface classes。
+
++ 程序库头文件应该以“完全且仅有声明式”的形式存在，这种做法不论是否涉及templates都适用。
+
+在说这一条款之前，先要了解一下C/C++的编译知识，假设有三个类ComplexClass, SimpleClass1和SimpleClass2，采用头文件将类的声明与类的实现分开，这样共对应于6个文件，分别是`ComplexClass.h`，`ComplexClass.cpp`，`SimpleClass1.h`，`SimpleClass1.cpp`，`SimpleClass2.h`，`SimpleClass2.cpp`。
+
+ComplexClass复合两个BaseClass，SimpleClass1与SimpleClass2之间是独立的，ComplexClass的.h是这样写的：
+
+```c++
+#ifndef COMPLESS_CLASS_H
+#define COMPLESS_CLASS_H
+
+#include “SimpleClass1.h”
+#include “SimpleClass2.h”
+
+class ComplexClass
+{
+    SimpleClass1 xx;
+    SimpleClass2 xxx;
+};
+…
+
+#endif /* COMPLESS _CLASS_H */
+```
+
+我们来考虑以下几种情况：
+
+**Case 1：**
+
+现在`SimpleClass1.h`发生了变化，比如添加了一个新的成员变量，那么没有疑问，`SimpleClass1.cpp`要重编，`SimpleClass2`因为与`SimpleClass1`是独立的，所以`SimpleClass2`是不需要重编的。
+
+那么现在的问题是，`ComplexClass`需要重编吗？
+
+**答案是"是"，因为ComplexClass的头文件里面包含了`SimpleClass1.h`（使用了SimpleClass1作为成员对象的类），而且所有使用ComplexClass类的对象的文件，都需要重新编译！**
+
+如果把ComplexClass里面的`#include “SimpleClass1.h”`给去掉，当然就不会重编ComplexClass了，但问题是也不能通过编译了，因为ComplexClass里面声明了SimpleClass1的对象xx。那如果把`#include “SimpleClass1.h”`换成类的声明class SimpleClass1，会怎么样呢？能通过编译吗？
+
+**答案是"否"，因为编译器需要知道ComplexClass成员变量SimpleClass1对象的大小，而这些信息仅由class SimpleClass1是不够的，但如果SimpleClass1作为一个函数的形参，或者是函数返回值，用class SimpleClass1声明就够了。** 如：
+
+```c++
+// ComplexClass.h
+class SimpleClass1;
+…
+SimpleClass1 GetSimpleClass1() const;
+…
+```
+
+但如果换成指针呢？像这样：
+
+```c++
+// ComplexClass.h
+#include “SimpleClass2.h”
+
+class SimpleClass1;
+
+class ComplexClass: 
+{
+    SimpleClass1* xx;
+    SimpleClass2 xxx;
+};
+```
+
+这样能通过编译吗？
+
+答案是"是"，因为编译器视所有指针为一个字长（在32位机器上是4字节），因此`class SimpleClass1`的声明是够用了。但如果要想使用SimpleClass1的方法，还是要包含`SimpleClass1.h`，但那是ComplexClass.cpp做的，因为`ComplexClass.h`只负责类变量和方法的声明。
+
+那么还有一个问题，如果使用`SimpleClass1*`代替SimpleClass1后，`SimpleClass1.h`变了，ComplexClass需要重编吗？
+
+先看Case2。
+
+**Case 2：**
+
+回到最初的假定上（成员变量不是指针），现在`SimpleClass1.cpp`发生了变化，比如改变了一个成员函数的实现逻辑（换了一种排序算法等），但`SimpleClass1.h`没有变，那么SimpleClass1一定会重编，SimpleClass2因为独立性不需要重编，那么现在的问题是，ComplexClass需要重编吗？
+
+**答案是"否"，因为编译器重编的条件是发现一个变量的类型或者大小跟之前的不一样了，但现在SimpleClass1的接口并没有任务变化，只是改变了实现的细节，所以编译器不会重编。**
+
+**Case 3：**
+
+结合Case1和Case2，现在我们来看看下面的做法：
+
+```c++
+// ComplexClass.h
+#include “SimpleClass2.h”
+
+class SimpleClass1;
+
+class ComplexClass
+{
+    SimpleClass1* xx;
+    SimpleClass2 xxx;
+};
+```
+
+```c++
+// ComplexClass.cpp
+
+void ComplexClass::Fun()
+{
+    SimpleClass1->FunMethod();
+}
+```
+
+请问上面的ComplexClass.cpp能通过编译吗？
+
+**答案是"否"，因为这里用到了SimpleClass1的具体的方法，所以需要包含SimpleClass1的头文件，但这个包含的行为已经从ComplexClass里面拿掉了（换成了class SimpleClass1），所以不能通过编译。**
+
+如果解决这个问题呢？其实很简单，只要在`ComplexClass.cpp`里面加上`#include “SimpleClass1.h”`就可以了。换言之，我们其实做的就是将`ComplexClass.h`的`#include “SimpleClass1.h”`移至了`ComplexClass1.cpp`里面，而在原位置放置`class SimpleClass1`。
+
+这样做是为了什么？假设这时候SimpleClass1.h发生了变化，会有怎样的结果呢？
+
+**SimpleClass1自身一定会重编，SimpleClass2当然还是不用重编的，`ComplexClass.cpp`因为包含了`SimpleClass1.h`，所以需要重编，但换来的好处就是所有用到ComplexClass的其他地方，它们所在的文件不用重编了！因为ComplexClass的头文件没有变化，接口没有改变！**
+
+**总结一下，对于C++类而言，如果它的头文件变了，那么所有这个类的对象所在的文件都要重编，但如果它的实现文件（cpp文件）变了，而头文件没有变（对外的接口不变），那么所有这个类的对象所在的文件都不会因之而重编。**
+
+因此，避免大量依赖性编译的解决方案就是：**<font color = red>在头文件中用class声明外来类，用指针或引用代替变量的声明；在cpp文件中包含外来类的头文件。</font>**
+
+#### Handler classes
+
+下面再来看书，去理解书上说的`Handler classes`就简单多了
+
+假设我们要写一个Person类，如下：
+
+```c++
+class Person
+{
+private:
+    string name;
+    MyDate birthday;
+    MyAddress address;
+
+public:
+    // fallows functions
+    // ...
+};
+```
+
+这个Person类里面包含有人的名字，人的生日以及地址，还有一些没有列出来的方法。注意到这里用到了string（它不是一个class，只是一个typedef，大多数情况下，我们认为它不会有任何改变），以及自定义的类MyDate与MyAddress，一种常见的做法是采用include头文件，像这样：
+
+```c++
+#include <string>
+#include "MyDate.h"
+#include "MyAddress.h"
+```
+
+在`MyDate.h`里面写好日期类相关的成员变量与方法，而在`MyAddress.h`里面写好地址类相关的成员变量与方法。 **但如果此后要往MyDate类或者MyAddresss类添加成员变量，那么不仅仅所有用到MyDate或者MyAddress对象的文件需要重新编译，而且所有用到Person对象的文件也需要重编译，一个小改动竟然会牵涉到这么多的地方！**
+
+可以把问题归结为 **“C++并没有把将接口从实现中分离这件事做好”** ，因为包含头文件的做法很直观很方便，用的人也很普遍，而C++并没有对这种做法加以限制。
+
+如果要把编译的依赖性降低，就要换一种思路来处理， **不能出现定义式，只能出现声明式，代价是增加代码的复杂度以及性能上的一些损失。**
+
+书上提到了两种方法，第一种是采用 `Handler Classes`（用指针指向真正实现的方法），第二种是 `Interface Classes`（抽象基类）。
+
+对于第一种`Handler Class`，一句话，**就是`.h`里面不包含类的自定义头文件，用“class 类名”的声明方式进行代替（也要把相应的成员变量替换成指针或引用的形式），在`.cpp`文件里面包含类的自定义头文件去实现具体的方法。** 改造之后的程序看起来是这样子的：
+
+```c++
+// Person.h
+#include <string>
+using namespace std;
+
+class PersonImp;
+
+class Person
+{
+private:
+    //string Name;
+    //MyDate Birthday;
+    //MyAddress Address;
+    PersonImp* MemberImp;
+
+public:
+    string GetName() const;
+    string GetBirthday() const;
+    string GetAddress() const;
+    // follows functions
+    // ...
+};
+```
+
+```c++
+// Person.cpp
+#include "PersonImp.h"
+#include "Person.h"
+
+string Person::GetName() const
+{
+    return MemberImp->GetName();
+}
+string Person::GetBirthday() const
+{
+    return MemberImp->GetName();
+}
+string Person::GetAddress() const
+{
+    return MemberImp->GetAddress();
+}
+```
+
+```c++
+// PersonImp.h
+#ifndef PersonImp_H
+#define PersonImp_H
+
+#include <string>
+#include "MyAddress.h"
+#include "MyDate.h"
+using namespace std;
+
+class PersonImp
+{
+private:
+    string Name;
+    MyAddress Address;
+    MyDate Birthday;
+
+public:
+    string GetName() const
+    {
+        return Name;
+    }
+
+    string GetAddress() const
+    {
+        return Address.ToString();
+    }
+
+    string GetBirthday() const
+    {
+        return Birthday.ToString();
+    }
+};
+
+#endif /* PersonImp_H */
+```
+
+```c++
+// MyDate.h
+#ifndef MY_DATE_H
+#define MY_DATE_H
+
+#include <string>
+using namespace std;
+
+class MyDate
+{
+private:
+    int Year;
+    int Month;
+    int DayOfMonth;
+
+public:
+    string ToString() const;
+}
+#endif /* MY_DATE_H */
+```
+
+```c++
+// MyAddress.h
+#ifndef MY_ADDRESS_H
+#define MY_ADDRESS_H
+
+#include <string>
+using namespace std;
+
+class MyAddress
+{
+private:
+    string Country;
+    string Province;
+    string City;
+    string Street;
+
+public:
+    string ToString() const;
+};
+
+#endif /* MY_ADDRESS_H */
+```
+
+这里有一点要说一下，在`Person.h`里面并没有使用`MyDate *`和`MyAddress *`，而是用了`PersonImp*`，由PersonImp里面包含MyDate与MyAddress，这样做的好处 **就是方便统一化管理，它要求PersonImp里面的方法与Person的方法是一致的。以后Person添加成员变量，可以直接在PersonImp中进行添加了，从而起到了隔离和隐藏的作用，因为客户端代码大量使用的将是Person，而不必关心PersonImp，用于幕后实现的PersonImp只面向于软件开发者而不是使用者**。
+
+书上是用shared_ptr来管理PersonImp的，使资源管理上更加科学与合理。
+
+另外，书上也提倡把class x; class xx; class xxx;的声明放至一个名为`”xxxfwd.h”`的头文件里，比如`”datefwd.h”`，这个头文件里面只有声明式，而没有具体的类细节。也就是说，对于某个类，比如MyDate，应该分出三个文件，一个是`datefwd.h`，里面是一些用到的外来的class声明式；一个是`MyDate.h`里面是MyDate类的结构声明；一个是`MyDate.cpp`，它与MyDate.h配对，给出具体的实现细节。
+
+#### Interface Classes
+
+下面来谈谈书中的第二部分，用`Interface Classes`来降低编译的依赖。从上面也可以看出，避免重编的诀窍就是保持头文件（接口）不变化，而保持接口不变化的诀窍就是不在里面声明编译器需要知道大小的变量， **`Handler Classes`的处理就是把变量换成变量的地址（指针），头文件只有class xxx的声明，而在cpp里面才包含xxx的头文件。`Interface Classes`则是利用继承关系和多态的特性，在父类里面只包含成员方法（成员函数），而没有成员变量，像这样：**
+
+```c++
+// Person.h
+#include <string>
+using namespace std;
+
+class MyAddress;
+class MyDate;
+class RealPerson;
+
+class Person
+{
+public:
+    virtual string GetName() const = 0;
+    virtual string GetBirthday() const = 0;
+    virtual string GetAddress() const = 0;
+    virtual ~Person(){}
+};
+```
+
+而这些方法的实现放在其子类中，像这样：
+
+```c++
+// RealPerson.h
+#include "Person.h"
+#include "MyAddress.h"
+#include "MyDate.h"
+
+class RealPerson: public Person
+{
+private:
+    string Name;
+    MyAddress Address;
+    MyDate Birthday;
+public:
+    RealPerson(string name, const MyAddress& addr, const MyDate& date):Name(name), Address(addr), Birthday(date){}
+    virtual string GetName() const;
+    virtual string GetAddress() const;
+    virtual string GetBirthday() const;
+};
+```
+
+在`RealPerson.cpp`里面去实现`GetName()`等方法。从这里我们可以看到，只有子类里面才有成员变量，也就是说，如果Address的头文件变化了，那么子类一定会重编，所有用到子类头文件的文件也要重编， **所以为了防止重编，应该尽量少用子类的对象。利用多态特性，我们可以使用父类的指针，像这样`Person* p = new RealPerson(xxx)`，然后`p->GetName()`实际上是调用了子类的`GetName()`方法。**
+
+但这样还有一个问题，就是`new RealPerson()`这句话一写，就需要RealPerson的构造函数，那么RealPerson的头文件就要暴露了，这样可不行。还是只能用Person的方法，所以我们在`Person.h`里面加上这个方法：
+
+```c++
+// Person.h
+ static Person* CreatePerson(string name, const MyAddress& addr, const MyDate& date);
+```
+
+注意这个方法是静态的（没有虚特性），它被父类和所有子类共有，可以在子类中去实现它：
+
+```c++
+// RealPerson.cpp
+#include “Person.h”
+Person* Person::CreatePerson(string name, const MyAddress& addr, const MyDate& date)
+{
+    return new RealPerson(name, addr, date);
+}
+```
+
+```c++
+// Main.h
+class MyAddress;
+class MyDate;
+void ProcessPerson(const string& name, const MyAddress& addr, const MyDate& date);
+```
+
+```c++
+// Main.cpp
+#include "Person.h"
+#include “MyAddress.h”;
+#include “MyDate.h”;
+
+void ProcessPerson(const string& name, const MyAddress& addr, const MyDate& date)
+{
+    Person* p = Person::CreatePerson(name, addr, date);
+…
+}
+```
+
+总结一下，`Handler classes`与`Interface classe`s解除了接口和实现之间的耦合关系，从而降低文件间的编译依存性。减少编译依存性的关键在于保持`.h`文件不变化，具体地说，是保持被大量使用的类的`.h`文件不变化，这里谈到了两个方法：`Handler classes`与`Interface classes`。
+
+`Handler classes`化类的成员变量为指针，在`.h`文件里面只包含`class xxx`的外来类声明，而不包含其头文件，在`.cpp`涉及到具体外来类的使用时，才包含`xxx.h`的头文件，这样最多只影响本身类的`cpp`重编，但因为`.h`文件没有变化，所以此类的对象存在的文件不必重编。
+
+当然，书上说的`Handler classes`更想让我们在类A的基础上另造一个中间类AImp（成员函数完全与类A一致），这个中间类的成员中里面放置了所有类A需要的外来类的对象，然后类的逻辑细节完全在`Almp.cpp`中实现，而在`A.cpp`里面只是去调用`Almp.cpp`的同名方法。`A.h`的成员变量只有Almp的指针，这看上去好像一个Handler，因此而得名。
+
+`Interface classes`则是将细节放在子类中，父类只是包含虚方法和一个静态的Create函数声明，子类将虚方法实现，并实现Create接口。利用多态特性，在客户端只需要使用到Person的引用或者指针，就可以访问到子类的方法。由于父类的头文件里面不包含任何成员变量，所以不会导致重编（其实由于父类是虚基类，不能构造其对象，所以也不用担心由于父类头文件变化导致的重编问题）。
+
+
+
 
 
 
