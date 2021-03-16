@@ -63,14 +63,14 @@
 
 ## 七模板与泛型编程
 
-* [41.了解隐式接口与编译期动态]()
-* [42.了解typename的双重意义]()
-* [43. 学习处理模板化基类内的名称]()
-* [44.将与参数无关的代码抽离 templates]()
-* [45. 运用成员函数模板接受所有兼容类型]()
-* [46.需要类型转换时请为模板定义非成员函数]()
-* [47. 请使用traits classes 表现类信息]()
-* [48.认识 template 元编程]()
+* [41.了解隐式接口与编译期动态](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Templates%20and%20Generic%20Programming.md#41%E4%BA%86%E8%A7%A3%E9%9A%90%E5%BC%8F%E6%8E%A5%E5%8F%A3%E4%B8%8E%E7%BC%96%E8%AF%91%E6%9C%9F%E5%8A%A8%E6%80%81)
+* [42.了解typename的双重意义](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Templates%20and%20Generic%20Programming.md#42%E4%BA%86%E8%A7%A3typename%E7%9A%84%E5%8F%8C%E9%87%8D%E6%84%8F%E4%B9%89)
+* [43. 学习处理模板化基类内的名称](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Templates%20and%20Generic%20Programming.md#43-%E5%AD%A6%E4%B9%A0%E5%A4%84%E7%90%86%E6%A8%A1%E6%9D%BF%E5%8C%96%E5%9F%BA%E7%B1%BB%E5%86%85%E7%9A%84%E5%90%8D%E7%A7%B0)
+* [44.将与参数无关的代码抽离 templates](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Templates%20and%20Generic%20Programming.md#44%E5%B0%86%E4%B8%8E%E5%8F%82%E6%95%B0%E6%97%A0%E5%85%B3%E7%9A%84%E4%BB%A3%E7%A0%81%E6%8A%BD%E7%A6%BB-templates)
+* [45. 运用成员函数模板接受所有兼容类型](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Templates%20and%20Generic%20Programming.md#45-%E8%BF%90%E7%94%A8%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E6%A8%A1%E6%9D%BF%E6%8E%A5%E5%8F%97%E6%89%80%E6%9C%89%E5%85%BC%E5%AE%B9%E7%B1%BB%E5%9E%8B)
+* [46.需要类型转换时请为模板定义非成员函数](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Templates%20and%20Generic%20Programming.md#46%E9%9C%80%E8%A6%81%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E6%97%B6%E8%AF%B7%E4%B8%BA%E6%A8%A1%E6%9D%BF%E5%AE%9A%E4%B9%89%E9%9D%9E%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0)
+* [47. 请使用traits classes 表现类信息](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Templates%20and%20Generic%20Programming.md#47-%E8%AF%B7%E4%BD%BF%E7%94%A8traits-classes-%E8%A1%A8%E7%8E%B0%E7%B1%BB%E4%BF%A1%E6%81%AF)
+* [48.认识 template 元编程](https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/Effective%20C%2B%2B/Templates%20and%20Generic%20Programming.md#48%E8%AE%A4%E8%AF%86-template-%E5%85%83%E7%BC%96%E7%A8%8B)
 
 ## 八.定制 new 和 delete
 
