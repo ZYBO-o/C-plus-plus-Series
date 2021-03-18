@@ -662,12 +662,131 @@ public:
 
 ### 39.明智而审慎地使用private继承
 
++ **Private继承意味着`is implemented in terms of`，它通常比复合的级别低（即优先使用复合），但是当derived class需要访问protected base class的成员，或需要重新定义继承而来的virtual函数时，这么设计是合理的。**
++ **与复合不同，private继承可以造成empty base最优化。这对致力于“对象尺寸最小化”的程序库开发者而言，可能很重要。**
+
+private继承的意义在于“be implemented in turns of”，这个与上一条款中说的复合模型的第二层含义是相同的，这也意味着通常我们可以在这两种设计方法之间转换，但书上还是更提倡使用复合来进行类的设计。
+
+private继承与public的继承是完全不同的，主要体现在两个地方：
+
++ public继承在子类中保持父类的访问权限，即父类中是public的成员函数或成员变量，在子类中仍是public，对private或者protected的成员函数或成员变量亦是如此； **但private继承则不是这样了，它破坏了父类中的访问权限标定，将之都转成private，这对子类本身并无影响（照常访问），但却影响了子类的子类，子类的子类将无法访问这些声明/定义在爷爷辈类的成员变量或成员函数。**
+
++ Liskov法则不再适用，也就是说“一切父类出现的地方都可以被子类所替代”的法则在private这里不成立，请看下面的例子（来源自书上）：
+
+  ```c++
+  #include <iostream>
+  using namespace std;
+  
+  class Person{};
+  
+  class Student : private Person{};
+  
+  void eat(const Person& p){}
+  
+  int main()
+  {
+      Person p;
+      Student s;
+      eat(p); // OK
+      eat(s); // 编译报错：error C2243: “类型转换”: 从“Student *”到“const Person &”的转换存在，但无法访问
+  }
+  ```
+
+  >  但如果令Student公有继承Person，则编译器不会报错。这正是Liskov的可替代原则在private继承中不适用的体现。
+
+private继承使用的地方实在不多，除非有一些奇葩的设计需求，书上说了一个例子：
+
+```c++
+class TypeDefine
+{};
+
+class SimpleClass
+{
+    int a;
+    TypeDefine obj;
+};
+
+class SimpleDerivedClass : private TypeDefine
+{
+    int a;
+};
+
+int main()
+{
+    cout << sizeof(TypeDefine) << endl; // ？=> 1
+    cout << sizeof(SimpleClass) << endl; // ？=> 8
+    cout << sizeof(SimpleDerivedClass) << endl; // ？=> 4
+}
+```
+
+大家可以想一下“ ？”处的输出是什么。
+
+第一个是空类，空类就像是空气一样，仅仅是名字里面包含了“空”字，看起来是“空”的，但其实不是这样子的，空气里面混合了氧、氮、二氮化碳等气体，还有各种微生物，而对于空类，编译器会为之生成四个默认的函数：默认构造函数，默认拷贝构造，默认析构函数，默认赋值运算符。读者就会问了，编译器生成了默认的函数不假，但函数是不占空间的，为什么空类的sizeof算出的值是1？ **原来类的每一个对象都需要一个独一无二的内存地址，所以编译器会在空类对象中插入一个1字节变量，正是这个1字节的变量，才能够区分空类的不同对象。非空类因为已经有了成员变量，所以编译器可以利用这些成员变量来进行内存地址的区分，从而标识类的不同对象，这个时候是不需要插入一个1字节的变量的。所以第一个问号处输出的是1。**
+
+第二个问号输出的是5吗？int四字节再加到空类对象的四字节？理论上是这样， **但编译器还会做一种内存对齐的操作，使得类对象的大小会是处理字长的整数倍，一般是4字节的整数倍，所以最后的结果其实是8。**
+
+第三个问号呢？前面讲的那么多，好像都与private无关，这个问题终于与它有关了。运行下看看，结果是4。为什么用复合模型时输出的结果是8，但private继承时却是4呢？ **<font color = red>这其实是编译器做了空白基类优化（EBO），原本是要为空白类对象插入1字节的，但因为子类中已经有了对象了，这样理论上就可以凭借这个对象来进行同一个类不同对象间的识别了，所以这时候编译器就不再插入字节了。</font>**
+
+这个结果就是用private继承的好处，是不是很奇葩呢~所以我说，在大部分情况下，都不会考虑private继承，因为它的含义be implemented in terms of 可以用复合来替换。
+
+书上还提到了关于虚函数不想被子类的子类所覆写的问题，这时候不能用private限制虚函数，因为生成的虚指针是一直会被继承下去的，解决方法就是用复合，而且复合的类是一个临时类且复合对象标记为private，这样就只能限制在这个类本身去覆写了。具体的例子可以去看原书。
 
 
 ---
 
 ### 40.明智而审慎地使用多重继承
 
++ **多重继承比单一继承更复杂。它可能导致新的歧义性，以及对virtual继承的需要。**
++ **virtual继承会增加大小、速度、初始化（及赋值）复杂度等等成本。如果virtual base classes不带任何数据，将是最具实用价值的情况。**
++ **多重继承的确有正当用途。其中一个情节涉及”public继承某个Interface class”和”private继承某个协助实现的class”的两两组合。**
+
+多重继承是一种比较复杂的继承关系，它意味着如果用户想要使用这个类，那么就要对它的父类也了如指掌，所以在项目中会带来可读性的问题，一般我们都会尽量选择用单继承去替代它。
+
+使用多重继承过程容易碰到的问题就是名字冲突，像下面这样：
+
+```c++
+class Base1
+{
+public:
+    void fun(){}
+};
+
+class Base2
+{
+private:
+    void fun(){}
+};
+
+class Derived : public Base1, public Base2
+{};
+
+int main()
+{
+    Derived d;
+    d.fun(); // error C2385: 对“fun”的访问不明确
+    return 0;
+}
+```
+
+因为在两个父类中都有名为fun的函数，所以这时候编译器不知道用户想调用的是哪个函数。但这里细心的读者会发现，这里我们是把Base2的fun的访问权限设为了private的。这个例子同时也说明了， **编译器会优先去查找最合适的重载函数，再去考虑它的可访问性。** <font color = red>如果真的要去访问重名的函数，可以指定作用域，像这样`d.Base1::fun()`（但注意d.Base2::fun()不行，因为它的访问性是private的）。</font>
+
+多重继承另一个容易碰到的问题就是虚继承，我记得这还是面试官的一道面试题。试想一下，有一个父类名为A，类B和类C都继承于A，类D又同时继承了B和C（多重继承），那么如果不做任何处理，C++的类继承图里会包含两份A。
+
+但如果在继承的时候加了virtual，像下面这样：
+
+```c++
+class B: virtual public A{…}
+class C: virtual public A{…}
+```
+
+那么D中就只有一份A了。C++标准库里面的流就是采用这样的形式，有一个父流basic_ios，basic_istream和basic_ostream分别虚继承于basic_ios，而basic_iostream又多重继承于basic_istream和basic_ostream。
+
+为了保证不会出现两份父类，只要是public继承理论上都应该有virutal关键字， **但virutal也是有代价的，访问virtual base class的成员变量要比访问non-virutal base class的成员变量速度要慢。** 所以作者的忠告是：
+
++ **非必要不使用virtual classes继承，普通情况请使用non-virtual classes继承**
++ **如果必须使用virtual base classes，尽可能避免在其中放置数据。**
+
+后面的篇幅书上就举了一个多重继承的例子，在这里我就不说了，有兴趣的读者可以自己看看，但个人觉得还是能不用多重继承的时候，就尽量不用它，用复合+单继承往往能达到目的。
 
 
 ---
