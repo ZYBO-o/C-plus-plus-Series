@@ -155,6 +155,18 @@ while(cin>>word)
   }
   ```
 
+较早版本还有
+
+```c++
+if(!v.empty())
+	return pair<string,int>(v.back(),v.back().size());  //显示构造返回值
+```
+
+```c++
+if(!v.empty())
+	return make_pair(v.back(),v.back().size());  //使用make_pair来生成pair对象
+```
+
 
 
 ## 三.关联容器操作
@@ -217,7 +229,7 @@ while(cin>>word)
   - 若关键字不在容器中，则插入。first指向插入的元素，second为true
   - 若关键字在容器中，则插入失败。first指向给定元素，second为false
 
-- 向multiset/multimap添加单一元素，总是插入成功，insert/emplace返回一个``迭代器指向插入的元素`
+- 向multiset/multimap添加单一元素，总是插入成功，insert/emplace返回一个`迭代器指向插入的元素`
 
 - 例子：对map做insert
 
@@ -242,7 +254,9 @@ while(cin>>word)
     <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/46.png"  width="600"/> 
   </div>
 
-- 关联容器的特殊erase操作：可提供一个关键字，删除与其相关的所有元素，并返回删除元素的数量。对于关键字不重复的容器，erase总返回0或1
+  > 传递给erase一个迭代器或者迭代器对来删除一个元素或者一个元素范围。指定元素被删除，函数范围void 。
+
+- 关联容器的特殊erase操作：可提供一个关键字，删除与其相关的所有元素，并 **返回删除元素的数量** 。对于关键字不重复的容器， **erase总返回0或1**
 
 
 
@@ -252,7 +266,7 @@ while(cin>>word)
 
   - map和unordered_map都有下标算符和at函数
   - multimap和unordered_multimap都不支持下标，因为一个关键字可能有多个值
-  - 所有的set类型都不支持下标，因为没有值
+  - 所有的set类型都不支持下标，因为没有与关键字相关联的"值"
 
 + map和unordered_map的下标操作如表11.6：
 
@@ -260,7 +274,7 @@ while(cin>>word)
     <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/47.png"  width="600"/> 
   </div>
 
-- map/unordered_map下标接受一个关键字，访问与其关联的值。**<font color = red>若关键字不在容器中，则创建元素插入容器，关联值进行`值初始化`。</font>**
+- map/unordered_map下标接受一个关键字，访问与其关联的值。 **<font color = red>若关键字不在容器中，则创建元素插入容器，关联值进行`值初始化`。</font>** 
 
 - 例子：map用下标插入元素时值初始化为0
 
@@ -276,7 +290,7 @@ while(cin>>word)
 
 - 由于下标可能插入新元素，故**只可对非const的map/unordered_map使用下标**
 
-- 通常解引用迭代器和下标返回的类型一样，但map/unordered_map不一样，它们解引用迭代器得到`value_type`，下标得到`mapped_type`
+- 通常解引用迭代器和下标返回的类型一样，但map/unordered_map不一样， **<font color = 'red'>它们解引用迭代器得到`value_type`，进行下标操作会得到`mapped_type`</font>**
 
 - map的下标返回`左值`
 
@@ -312,9 +326,9 @@ while(cin>>word)
 
 - `lower_bound`和`upper_bound`成员函数查找范围：
 
-  - 若给定关键字在容器中，则lower_bound返回``第一个匹配元素的迭代器`，upper_bound返回`最后一个匹配元素之后的迭代器`
+  - 若给定关键字在容器中，则lower_bound返回`第一个匹配元素的迭代器`，upper_bound返回`最后一个匹配元素之后的迭代器`
   - 若给定关键字不在容器中，则lower_bound和upper_bound都返回指向第一个大于该关键字的元素的迭代器，该位置称为`安全插入点`，即在此处insert该关键字可保持容器中关键字的顺序
-  - lower_bound和upper_bound都不支持无序容器
+  - lower_bound和upper_bound都 **不支持无序容器**
 
 - `equal_range`成员函数相当于用同样的关键字调用lower_bound和upper_bound，它返回一个迭代器pair。
 
@@ -466,4 +480,8 @@ while(cin>>word)
   SD_multiset bookstore(42,hasher,eqOp);
   ```
 
-  
+
+
+
+---
+
