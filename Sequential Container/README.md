@@ -166,7 +166,7 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 
 - 可对array做列表初始化，列表长度须小于等于array大小，如果小于，则初始化靠前元素，剩下的被值初始化。
 
-- **与内置数组不同的是，array允许做整个容器的拷贝和赋值，要求两array大小和元素类型都一样才行。**只是不能增减大小。
+-  **与内置数组不同的是，array允许做整个容器的拷贝和赋值，要求两array大小和元素类型都一样才行。** 只是不能增减大小。
 
 - 例子：array的初始化和拷贝
 
@@ -215,8 +215,8 @@ forward_list<string> words(articles.begin(),articles.end());    //对，不需�
 
 
 - `swap`交换两个相同类型容器的内容
-- 除array外，swap操作都不交换元素本身，只交换数据结构。因此都是`O(1)`时间
-- 对array做swap会真正交换元素，故是`O(n)`时间
+-  **除array外，swap操作都不交换元素本身，只交换数据结构。因此都是`O(1)`时间。**
+- **对array做swap会真正交换元素，故是`O(n)`时间**
 - swap前后迭代器/指针/引用的变化：
   - 除string和array外，指向元素的迭代器/指针/引用，在swap后都指向原来的元素，但已经属于不同的容器了。例如：`it`指向`svec1[3]`，在进行`swap(svec1,svec2);`后，`it`指向`svec2[3]`，对`it`解引用得到的结果前后一致。
   - 对string使用swap导致之前的迭代器/指针/引用都失效
@@ -350,7 +350,7 @@ c.push_back(Sales_data("12345678",25,15.99));
   </div>
 
 - `pop_front`和`pop_back`成员函数分别删除首元素和尾元素
-- vector/string不支持push_front/pop_front，forward_list不支持push_front/pop_front
+- vector/string不支持push_front/pop_front，forward_list不支持push_back/pop_back
 - pop_front/pop_back返回void，若需要值，需在pop之前保存
 - 不能对空容器做删除操作
 - `erase`可从指定的任意位置删除元素，它有两个版本：
