@@ -222,6 +222,16 @@ auto ret = copy(begin(a1),end(a1),a2);//把a1的内容拷贝给a2
 
 - unique不真正删除元素，只是将后面的不重复值前移来覆盖前面的重复值，使不重复值在序列前部。
 
+  ```c++
+  std::vector<std::string> words {"the", "quick", "red", "fox", "jumps", "over", "the", "slow", "red", "turtle"};
+  std::sort(words.begin(), words.end());
+  auto end_unique = std::unique(words.begin(), words.end());
+  for (auto i = words.begin(); i != words.end(); ++i) {
+  std::cout << *i << std::endl;
+  }
+  return 0;
+  ```
+
 - unique将不重复元素向首部集中，尾部（返回迭代器之后）的元素值是未定义
 
 - 真正删除元素需要使用容器操作
@@ -308,7 +318,7 @@ int main(){
 
    ```c++
   [capture list](parameter list) -> return type {function body}
-   ```
+  ```
 
   - capture list是`捕获列表`，是lambda所在函数中定义的局部变量的列表
   - parameter list、return type、function body与函数一样

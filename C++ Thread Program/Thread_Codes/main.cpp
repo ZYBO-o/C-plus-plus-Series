@@ -1,5 +1,8 @@
 #include <iostream>
 #include <thread>
+#include <vector>
+
+#include <string>
 
 void Hello () {
     std::cout << "This is thread1" << std::endl;
@@ -67,15 +70,16 @@ int main() {
     /*
      * 其他创建线程的方法2：
      * 使用lambda表达式
+     * auto mylambda = [] {
+     *    std::cout << "This lambda thread1 start" << std::endl;
+     *    std::cout << "This lambda thread1 over" << std::endl;
+     * };
+
+     * std::thread t(mylambda);
+     * t.join();
+     * std::cout<< "this is main thread " << std::endl;
      */
-    auto mylambda = [] {
-        std::cout << "This lambda thread1 start" << std::endl;
-        std::cout << "This lambda thread1 over" << std::endl;
-    };
 
-    std::thread t(mylambda);
-    t.join();
-    std::cout<< "this is main thread " << std::endl;
 
-    return 0;
+
 }

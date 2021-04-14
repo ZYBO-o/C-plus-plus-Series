@@ -1,46 +1,14 @@
 # C++ 学习规划
 
-## 一.二月计划
-
-> + C++ Primer二刷完成
-> + 笔记记录完成
-
-## 二.三月学习计划
-
-> + Effective C++完成
-> + 剑指offer看完
-> + 计算机网络与操作系统基础知识积累与背诵
-> + 刷题100道
-
-## 三.四月学习计划
-
-> + More Effective C++学习
-> + TCP/IP编程
-> + 刷题100道
-
-## 五月学习计划
-
-> + STL学习
-> + 刷题100道
-> + Linux服务器编程
-
-## 六月学习计划
-
-> + 深入探索**C++** 对象模型
-> + 准备实习
-> + 刷题100道
-
-
-
 需要完成的书籍：
 
-C++ Primer
+~~C++ Primer~~
 
-Effective C++
+~~Effective C++~~
 
 More Effective C++
 
-STL 
+~~STL~~ 
 
 深入探索**C++** 对象模型
 
@@ -51,8 +19,6 @@ Linux网络编程
 服务器编程
 
 UNIX编程
-
-
 
 C++多线程
 
@@ -120,7 +86,7 @@ C++多线程
   + [使用istringstream](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/IO%20library#1%E4%BD%BF%E7%94%A8istringstream)
   + [使用ostringstream](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/IO%20library#2%E4%BD%BF%E7%94%A8ostringstream)
 
-##五.顺序容器
+## 五.顺序容器
 
 + [顺序容器概述](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#%E4%B8%80%E9%A1%BA%E5%BA%8F%E5%AE%B9%E5%99%A8%E6%A6%82%E8%BF%B0)
 + [容器库概览](https://github.com/ZYBO-o/C-plus-plus-Series/tree/main/Sequential%20Container#%E4%BA%8C%E5%AE%B9%E5%99%A8%E5%BA%93%E6%A6%82%E8%A7%88)
