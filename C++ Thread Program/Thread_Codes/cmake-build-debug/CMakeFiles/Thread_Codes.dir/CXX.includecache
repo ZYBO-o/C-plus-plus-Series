@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/C++ Thread Program/Thread_Codes/main.cpp
+iostream
+-
+thread
+-
+
