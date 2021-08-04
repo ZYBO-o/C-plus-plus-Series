@@ -80,6 +80,9 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/C++ Thread Program/Thread_Codes/Test3.h">
+			<Option target="Thread_Codes"/>
+		</Unit>
 		<Unit filename="/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/C++ Thread Program/Thread_Codes/main.cpp">
 			<Option target="Thread_Codes"/>
 		</Unit>

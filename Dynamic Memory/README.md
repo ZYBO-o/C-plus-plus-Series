@@ -529,6 +529,7 @@ int main(){
 
 - 可通过release/reset成员函数将指针所有权从一个（非const）unique_ptr转移给另一个unique_ptr
 
+  - 因为unique_ptr只能独占，所以`p.reset(q)` 是无法实现的，必须将智能指针q与其所指对象之间的联系切断，即进行`release`操作。
   - `release`函数返回unique_ptr当前保存的指针，并将unique_ptr置为空
   - `reset`函数将unique_ptr原来指向的对象被释放，并接受一个可选的内置指针参数，令unique_ptr重新指向给定的指针。
 
@@ -859,7 +860,7 @@ int main(){
 + allocator的伴随算法见表12.8
 
   <div align="center">  
-    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/56.png"  width="600"/> 
+    <img src="https://github.com/ZYBO-o/C-plus-plus-Series/blob/main/images/57.png"  width="600"/> 
   </div>
 
 - uninitialized_copy类似copy，接受3个迭代器参数，前两个表示输入序列，第三个表示目的位置。目的位置必须是未构造的内存。该函数在目的位置构造元素，并返回已构造序列的尾后迭代器

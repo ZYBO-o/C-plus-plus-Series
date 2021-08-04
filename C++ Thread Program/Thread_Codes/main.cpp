@@ -1,7 +1,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-
+#include "Test3.h"
 #include <string>
 
 void Hello () {
@@ -37,6 +37,8 @@ public:
  *  joinable:判断是否可以成功使用join或detach
  */
 int main() {
+
+    Test3();
 
     /*
      * 创建线程，线程执行起点为Hello()

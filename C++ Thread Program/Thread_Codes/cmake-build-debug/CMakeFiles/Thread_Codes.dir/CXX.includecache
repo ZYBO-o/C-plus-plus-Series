@@ -6,6 +6,12 @@
 
 #IncludeRegexTransform: 
 
+/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/C++ Thread Program/Thread_Codes/Test3.h
+iostream
+-
+thread
+-
+
 /Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/C++ Thread Program/Thread_Codes/main.cpp
 iostream
 -
@@ -13,6 +19,8 @@ thread
 -
 vector
 -
+Test3.h
+/Users/zhangyongbin/Desktop/Github Projects/C++ Series/C++ Primer/C++ Thread Program/Thread_Codes/Test3.h
 string
 -
 

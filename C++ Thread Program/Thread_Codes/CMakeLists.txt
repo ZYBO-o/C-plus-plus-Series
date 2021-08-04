@@ -3,4 +3,4 @@ project(Thread_Codes)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(Thread_Codes main.cpp)
+add_executable(Thread_Codes main.cpp Test3.h)
